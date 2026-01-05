@@ -69,6 +69,12 @@ vim.pack.add({
 	{ src = "https://github.com/williamboman/mason-lspconfig.nvim" },
 })
 
+vim.lsp.config.ruby_lsp = {
+  cmd = { "/Users/jacksonlafranceshopify/.gem/ruby/dev-stable/bin/ruby-lsp" },
+  filetypes = { "ruby", "eruby" },
+  root_markers = { "Gemfile", ".git" },
+}
+
 vim.lsp.enable({ "lua_ls", "pyright", "ts_ls", "clangd", "ruby_lsp" })
 
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -86,9 +92,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 require "oil".setup()
 require "mason".setup()
-require("mason-lspconfig").setup({
-	ensure_installed = { "ruby_lsp" },
-})
 
 local telescope = require("telescope")
 
