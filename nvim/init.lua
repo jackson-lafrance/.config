@@ -33,7 +33,15 @@ local map = vim.keymap.set
 map('n', '<leader>o', ':update<CR> :source<CR>')
 map('n', '<leader>q', ':quit<CR>')
 map('n', '<leader>w', ':write<CR>')
-map('n', '<leader>lf', vim.lsp.buf.format)
+map('n', '<leader>lf', function()
+  if vim.bo.filetype == "ruby" then
+    local file = vim.fn.expand("%:p")
+    vim.cmd("silent !rubocop -a --config ~/.rubocop.yml " .. vim.fn.shellescape(file))
+    vim.cmd("edit!")
+  else
+    vim.lsp.buf.format()
+  end
+end)
 map('n', '<leader>e', ':Oil<CR>')
 map({ 'n', 'v', 'x' }, '<leader>y', '"+y<CR>')
 map({ 'n', 'v', 'x' }, '<leader>d', '"+d<CR>')
@@ -68,12 +76,6 @@ vim.pack.add({
 	{ src = "https://github.com/nvim-lualine/lualine.nvim" },
 	{ src = "https://github.com/williamboman/mason-lspconfig.nvim" },
 })
-
-vim.lsp.config.ruby_lsp = {
-  cmd = { "/Users/jacksonlafranceshopify/.gem/ruby/dev-stable/bin/ruby-lsp" },
-  filetypes = { "ruby", "eruby" },
-  root_markers = { "Gemfile", ".git" },
-}
 
 vim.lsp.enable({ "lua_ls", "pyright", "ts_ls", "clangd", "ruby_lsp" })
 
