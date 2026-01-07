@@ -1,5 +1,25 @@
 local vim = vim
 
+vim.pack.add({
+	{ src = "https://github.com/vague2k/vague.nvim" },
+	{ src = "https://github.com/stevearc/oil.nvim" },
+	{ src = "https://github.com/neovim/nvim-lspconfig" },
+	{ src = "https://github.com/mason-org/mason.nvim" },
+	{ src = "https://github.com/williamboman/mason-lspconfig.nvim" },
+	{ src = "https://github.com/nvim-telescope/telescope.nvim",          branch = "0.1.8" },
+	{ src = "https://github.com/nvim-telescope/telescope-ui-select.nvim" },
+	{ src = "https://github.com/LinArcX/telescope-env.nvim" },
+	{ src = "https://github.com/nvim-lua/plenary.nvim" },
+	{ src = "https://github.com/nvim-tree/nvim-web-devicons" },
+	{ src = "https://github.com/nvim-treesitter/nvim-treesitter",        version = "main" },
+	{ src = "https://github.com/nvim-lualine/lualine.nvim" },
+	{ src = "https://github.com/hrsh7th/nvim-cmp" },
+	{ src = "https://github.com/hrsh7th/cmp-nvim-lsp" },
+	{ src = "https://github.com/hrsh7th/cmp-buffer" },
+	{ src = "https://github.com/hrsh7th/cmp-path" },
+})
+
+-- Options
 vim.o.winborder = "rounded"
 vim.o.tabstop = 2
 vim.o.number = true
@@ -11,9 +31,12 @@ vim.o.signcolumn = "yes"
 vim.o.ignorecase = true
 vim.o.undofile = true
 vim.o.autoindent = true
+vim.o.mouse = ""
+vim.o.completeopt = "menu,menuone,noselect"
 
 vim.g.mapleader = " "
 
+-- Load plugins
 vim.cmd("packadd plenary.nvim")
 vim.cmd("packadd telescope.nvim")
 vim.cmd("packadd telescope-ui-select.nvim")
@@ -23,91 +46,125 @@ vim.cmd("packadd lualine.nvim")
 vim.cmd("packadd oil.nvim")
 vim.cmd("packadd nvim-lspconfig")
 vim.cmd("packadd mason.nvim")
+vim.cmd("packadd mason-lspconfig.nvim")
 vim.cmd("packadd nvim-treesitter")
 vim.cmd("packadd vague.nvim")
+vim.cmd("packadd nvim-cmp")
+vim.cmd("packadd cmp-nvim-lsp")
+vim.cmd("packadd cmp-buffer")
+vim.cmd("packadd cmp-path")
 
+-- Keymaps
 local builtin = require("telescope.builtin")
-local function git_files() builtin.find_files({ no_ignore = true }) end
-
 local map = vim.keymap.set
-map('n', '<leader>o', ':update<CR> :source<CR>')
-map('n', '<leader>q', ':quit<CR>')
-map('n', '<leader>w', ':write<CR>')
-map('n', '<leader>lf', function()
-  if vim.bo.filetype == "ruby" then
-    local file = vim.fn.expand("%:p")
-    vim.cmd("silent !rubocop -a --config ~/.rubocop.yml " .. vim.fn.shellescape(file))
-    vim.cmd("edit!")
-  else
-    vim.lsp.buf.format()
-  end
-end)
-map('n', '<leader>e', ':Oil<CR>')
-map({ 'n', 'v', 'x' }, '<leader>y', '"+y<CR>')
-map({ 'n', 'v', 'x' }, '<leader>d', '"+d<CR>')
-map({ "n" }, "<leader>se", "<cmd>Telescope env<cr>")
-map({ "n" }, "<leader>f", builtin.find_files, { desc = "Telescope live grep" })
-map({ "n" }, "<leader>g", builtin.live_grep)
-map({ "n" }, "<leader>sg", git_files)
-map({ "n" }, "<leader>ss", builtin.current_buffer_fuzzy_find)
+
+map("n", "<leader>q", ":quit<CR>")
+map("n", "<leader>w", ":write<CR>")
+map("n", "<leader>e", ":Oil<CR>")
+map({ "n", "v", "x" }, "<leader>y", '"+y<CR>')
+map({ "n", "v", "x" }, "<leader>d", '"+d<CR>')
+map("n", "<leader>f", builtin.find_files, { desc = "Find files" })
+map("n", "<leader>g", builtin.live_grep, { desc = "Live grep" })
+map("n", "<leader>sg", function() builtin.find_files({ no_ignore = true }) end, { desc = "Find files (no ignore)" })
+map("n", "<leader>ss", builtin.current_buffer_fuzzy_find, { desc = "Buffer search" })
+map("n", "<leader>se", "<cmd>Telescope env<cr>", { desc = "Environment variables" })
+
 map("n", "<leader>o", function()
 	vim.diagnostic.open_float(nil, { focus = false })
-end, { desc = "Show diagnostics for current line" })
-vim.keymap.set("n", "<leader>c", function()
-	local file = vim.fn.expand("%:p")            -- full path to file
-	local output = vim.fn.expand("%:r")          -- path without extension
-	local file_escaped = vim.fn.shellescape(file) -- escape spaces/quotes
-	local out_escaped = vim.fn.shellescape(output)
+end, { desc = "Show diagnostics" })
 
-	vim.cmd("!clang++ -std=c++17 -O2 -o " .. out_escaped .. " " .. file_escaped)
-end, { desc = "Compile current C++ file" })
+map("n", "<leader>lf", function()
+	if vim.bo.filetype == "ruby" then
+		local file = vim.fn.expand("%:p")
+		vim.cmd("silent !rubocop -a --config ~/.rubocop.yml " .. vim.fn.shellescape(file))
+		vim.cmd("edit!")
+	else
+		vim.lsp.buf.format()
+	end
+end, { desc = "Format file" })
 
-vim.pack.add({
-	{ src = "https://github.com/vague2k/vague.nvim" },
-	{ src = "https://github.com/stevearc/oil.nvim" },
-	{ src = "https://github.com/neovim/nvim-lspconfig" },
-	{ src = "https://github.com/mason-org/mason.nvim" },
-	{ src = "https://github.com/nvim-telescope/telescope.nvim",          branch = "0.1.8" },
-	{ src = "https://github.com/nvim-telescope/telescope-ui-select.nvim" },
-	{ src = "https://github.com/LinArcX/telescope-env.nvim" },
-	{ src = "https://github.com/nvim-lua/plenary.nvim" },
-	{ src = "https://github.com/nvim-tree/nvim-web-devicons" },
-	{ src = "https://github.com/nvim-treesitter/nvim-treesitter",        version = "main" },
-	{ src = "https://github.com/nvim-lualine/lualine.nvim" },
-	{ src = "https://github.com/williamboman/mason-lspconfig.nvim" },
+map("n", "<leader>c", function()
+	local file = vim.fn.expand("%:p")
+	local output = vim.fn.expand("%:r")
+	vim.cmd("!clang++ -std=c++17 -O2 -o " .. vim.fn.shellescape(output) .. " " .. vim.fn.shellescape(file))
+end, { desc = "Compile C++ file" })
+
+-- LSP keymaps (set on attach)
+map("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
+map("n", "gr", vim.lsp.buf.references, { desc = "References" })
+map("n", "K", vim.lsp.buf.hover, { desc = "Hover" })
+map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename" })
+map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
+
+-- Mason setup (DO NOT add ruby_lsp here - use global installation)
+require("mason").setup()
+require("mason-lspconfig").setup({
+	ensure_installed = {
+		"lua_ls",
+		"pyright",
+		"ts_ls",
+		"clangd",
+		-- ruby_lsp excluded - using global gem
+	},
 })
 
-vim.lsp.enable({ "lua_ls", "pyright", "ts_ls", "clangd", "ruby_lsp" })
+-- Load the sources explicitly
+require("cmp_nvim_lsp")
 
-vim.api.nvim_create_autocmd('LspAttach', {
-	group = vim.api.nvim_create_augroup('my.lsp', {}),
-	callback = function(args)
-		local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
-		if client:supports_method('textDocument/completion') then
-			-- Optional: trigger autocompletion on EVERY keypress. May be slow!
-			local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
-			client.server_capabilities.completionProvider.triggerCharacters = chars
-			vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
-		end
-	end,
+local cmp = require("cmp")
+
+cmp.setup({
+  mapping = cmp.mapping.preset.insert({
+    ["<C-Space>"] = cmp.mapping.complete(),
+    ["<C-e>"] = cmp.mapping.abort(),
+    ["<CR>"] = cmp.mapping.confirm({ select = true }),
+    ["<Tab>"] = cmp.mapping.select_next_item(),
+    ["<S-Tab>"] = cmp.mapping.select_prev_item(),
+  }),
+  sources = {
+    { name = "nvim_lsp" },
+    { name = "path" },
+    { name = "buffer" },
+  },
+  window = {
+    completion = cmp.config.window.bordered(),
+    documentation = cmp.config.window.bordered(),
+  },
 })
 
-require "oil".setup()
-require "mason".setup()
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+local lspconfig = require("lspconfig")
 
+lspconfig.ruby_lsp.setup({ capabilities = capabilities })
+lspconfig.ts_ls.setup({ capabilities = capabilities })
+lspconfig.lua_ls.setup({ capabilities = capabilities })
+lspconfig.pyright.setup({ capabilities = capabilities })
+lspconfig.clangd.setup({ capabilities = capabilities })
+
+-- After requiring cmp, add this BEFORE vim.lsp.enable():
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+-- Configure each LSP with capabilities
+local lspconfig = require("lspconfig")
+
+lspconfig.lua_ls.setup({ capabilities = capabilities })
+lspconfig.pyright.setup({ capabilities = capabilities })
+lspconfig.ts_ls.setup({ capabilities = capabilities })
+lspconfig.clangd.setup({ capabilities = capabilities })
+lspconfig.ruby_lsp.setup({ capabilities = capabilities })
+
+-- Oil
+require("oil").setup()
+
+-- Telescope
 local telescope = require("telescope")
-
 telescope.setup({
 	defaults = {
 		preview = { treesitter = true },
 		color_devicons = true,
 		sorting_strategy = "ascending",
-
-		-- no invalid keys, avoids recursive config load
 		path_display = { "smart" },
-
 		borderchars = { "", "", "", "", "", "", "", "" },
-
 		layout_config = {
 			height = 0.95,
 			width = 0.95,
@@ -116,76 +173,36 @@ telescope.setup({
 		},
 	},
 })
+pcall(telescope.load_extension, "ui-select")
+pcall(telescope.load_extension, "env")
 
--- load ui-select safely (no crash if not installed)
-pcall(function()
-	telescope.load_extension("ui-select")
-end)
-
--- actions-preview with telescope backend
-pcall(function()
-	require("actions-preview").setup({
-		backend = { "telescope" },
-		telescope = require("telescope.themes").get_dropdown(),
-	})
-end)
-
-require('lualine').setup {
+-- Lualine
+require("lualine").setup({
 	options = {
 		icons_enabled = true,
-		theme = 'vague',
-		component_separators = { left = '', right = '' },
-		section_separators = { left = '', right = '' },
-		disabled_filetypes = {
-			statusline = {},
-			winbar = {},
-		},
-		ignore_focus = {},
-		always_divide_middle = true,
-		always_show_tabline = true,
+		theme = "vague",
+		component_separators = { left = "", right = "" },
+		section_separators = { left = "", right = "" },
 		globalstatus = false,
-		refresh = {
-			statusline = 1000,
-			tabline = 1000,
-			winbar = 1000,
-			refresh_time = 16, -- ~60fps
-			events = {
-				'WinEnter',
-				'BufEnter',
-				'BufWritePost',
-				'SessionLoadPost',
-				'FileChangedShellPost',
-				'VimResized',
-				'Filetype',
-				'CursorMoved',
-				'CursorMovedI',
-				'ModeChanged',
-			},
-		}
 	},
 	sections = {
-		lualine_a = { 'mode' },
-		lualine_b = { 'branch', 'diff', 'diagnostics' },
-		lualine_c = { 'filename' },
-		lualine_x = { 'encoding', 'fileformat', 'filetype' },
-		lualine_y = { 'progress' },
-		lualine_z = { 'location' }
+		lualine_a = { "mode" },
+		lualine_b = { "branch", "diff", "diagnostics" },
+		lualine_c = { "filename" },
+		lualine_x = { "encoding", "fileformat", "filetype" },
+		lualine_y = { "progress" },
+		lualine_z = { "location" },
 	},
 	inactive_sections = {
 		lualine_a = {},
 		lualine_b = {},
-		lualine_c = { 'filename' },
-		lualine_x = { 'location' },
+		lualine_c = { "filename" },
+		lualine_x = { "location" },
 		lualine_y = {},
-		lualine_z = {}
+		lualine_z = {},
 	},
-	tabline = {},
-	winbar = {},
-	inactive_winbar = {},
-	extensions = {}
-}
+})
 
-vim.cmd([[set mouse=]])
+-- Colorscheme
 vim.cmd("colorscheme vague")
 vim.cmd(":hi statusline guibg=NONE")
-vim.cmd [[set completeopt+=menuone,noselect,popup]]
