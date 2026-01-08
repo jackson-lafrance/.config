@@ -46,6 +46,7 @@ map('n', '<leader>nh', ':nohlsearch<CR>', { desc = 'Unhighlight current search' 
 map('n', '<leader>ss', ':/', { desc = 'Search' })
 map({ 'v', 'x' }, '<leader>sw', 'y :/<C-r>"', { desc = 'Search for the current selected text' })
 
+map({ 'n' }, '<leader>1', ':!', { desc = 'Write a terminal command' })
 
 --- Adding Plugins ---
 vim.pack.add({
@@ -120,7 +121,30 @@ vim.lsp.config('lua_ls', {
 })
 vim.lsp.enable('lua_ls')
 
-map({ 'n' }, '<leader>lf', vim.lsp.buf.format, { desc = 'Format current buffer' })
+-- copied the ruby part from the internet
+-- it basically checks if there is a rubocop.yml in the current repro and otherwise it just uses my global one
+map({ 'n' }, '<leader>lf', function()
+  if vim.bo.filetype == "ruby" then
+    local file = vim.fn.expand("%:p")
+    local function get_rubocop_config()
+      local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+      if vim.v.shell_error == 0 and git_root then
+        local project_config = git_root .. "/.rubocop.yml"
+        if vim.fn.filereadable(project_config) == 1 then
+          return project_config
+        end
+      end
+      return vim.fn.expand("~/.rubocop.yml")
+    end
+
+    local config = get_rubocop_config()
+    vim.cmd("silent !rubocop -a --config " .. vim.fn.shellescape(config) .. " " .. vim.fn.shellescape(file))
+    vim.cmd("edit!")
+  else
+    vim.lsp.buf.format()
+  end
+end, { desc = 'Format current buffer' })
+
 map({ 'n' }, '<leader>bb', function()
   vim.diagnostic.open_float(0, { scope = "line" })
 end, { desc = 'Check current line error' })
@@ -174,10 +198,14 @@ cmp.setup({
 })
 
 --- Ruby LSP Setup --
-require 'lspconfig'.ruby_lsp.setup({
+vim.lsp.config('ruby-lsp', {
+  cmd = { 'ruby-lsp' },
   capabilities = capabilities,
+  filetypes = { 'ruby' },
+  root_dir = vim.fs.root(0, { 'Gemfile', '.git' }),
   init_options = {
     formatter = 'standard',
     linters = { 'standard' },
   },
 })
+vim.lsp.enable('ruby-lsp')
