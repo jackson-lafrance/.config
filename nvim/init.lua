@@ -206,6 +206,23 @@ vim.lsp.config('ruby-lsp', {
   init_options = {
     formatter = 'standard',
     linters = { 'standard' },
+    experimentalFeaturesEnabled = true,
   },
 })
+
 vim.lsp.enable('ruby-lsp')
+
+vim.lsp.config('sorbet', {
+  cmd = { "srb", "tc", "--lsp" },
+  capabilities = capabilities,
+  filetypes = { 'ruby' },
+  root_dir = function(fname)
+    local util = require('lspconfig.util')
+    local project_root = util.root_pattern("sorbet/config")(fname)
+    if project_root then
+      return project_root
+    end
+    return vim.fn.expand("~/.config/sorbet-default")
+  end,
+})
+vim.lsp.enable('sorbet')
