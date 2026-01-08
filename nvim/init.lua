@@ -127,6 +127,7 @@ end, { desc = 'Check current line error' })
 
 local cmp = require 'cmp'
 local luasnip = require 'luasnip'
+
 cmp.setup({
   snippet = {
     expand = function(args)
@@ -170,4 +171,13 @@ cmp.setup({
   }, {
     { name = 'buffer' },
   })
+})
+
+--- Ruby LSP Setup --
+require 'lspconfig'.ruby_lsp.setup({
+  capabilities = capabilities,
+  init_options = {
+    formatter = 'standard',
+    linters = { 'standard' },
+  },
 })
