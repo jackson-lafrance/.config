@@ -8,6 +8,10 @@
       "rev": "cb938c25edaac38d362555f19244a9cb85d561e8",
       "src": "https://github.com/aznhe21/actions-preview.nvim"
     },
+    "blink.cmp": {
+      "rev": "6a4914ca987453464a7dfc7fc237a992adb567d0",
+      "src": "https://github.com/saghen/blink.cmp"
+    },
     "cmp-buffer": {
       "rev": "b74fab3656eea9de20a9b8116afa3cfc4ec09657",
       "src": "https://github.com/hrsh7th/cmp-buffer"
