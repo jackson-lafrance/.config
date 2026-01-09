@@ -4,7 +4,6 @@ local opt = vim.opt
 local map = vim.keymap.set
 
 --- Vim Settings ---
-
 vim.cmd(':hi statusline guibg=NONE')
 
 opt.number = true
@@ -20,6 +19,7 @@ vim.opt.signcolumn = "yes"
 opt.tabstop = 2
 opt.shiftwidth = 2
 opt.expandtab = true
+opt.autoindent = true
 
 opt.termguicolors = true
 opt.winborder = 'rounded'
@@ -43,10 +43,13 @@ map('n', '<leader>b', '<C-o>', { desc = 'Go back to previous jump' })
 map({ 'n', 'v', 'x' }, '<leader>vi', '<Cmd>edit $MYVIMRC<CR>', { desc = 'Edit ' .. vim.fn.expand('$MYVIMRC') })
 
 map('n', '<leader>nh', ':nohlsearch<CR>', { desc = 'Unhighlight current search' })
-map('n', '<leader>ss', ':/', { desc = 'Search' })
 map({ 'v', 'x' }, '<leader>sw', 'y :/<C-r>"', { desc = 'Search for the current selected text' })
 
 map({ 'n' }, '<leader>1', ':!', { desc = 'Write a terminal command' })
+
+map({ 'n' }, '<leader>bb', function()
+  vim.diagnostic.open_float(0, { scope = "line" })
+end, { desc = 'Check current line error' })
 
 --- Adding Plugins ---
 vim.pack.add({
@@ -60,13 +63,22 @@ vim.pack.add({
   { src = "https://github.com/hrsh7th/nvim-cmp" },
   { src = "https://github.com/L3MON4D3/LuaSnip" },
   { src = "https://github.com/hrsh7th/cmp-nvim-lsp" },
+  { src = "https://github.com/hrsh7th/cmp-buffer" },
+  { src = "https://github.com/saadparwaiz1/cmp_luasnip" },
+  { src = "https://github.com/windwp/nvim-autopairs" },
+  { src = "https://github.com/windwp/nvim-ts-autotag" },
+  { src = "https://github.com/nvim-lualine/lualine.nvim" },
 })
 
 --- Theme ---
 vim.cmd.colorscheme("rose-pine-main")
 
 --- Treesitter ---
-require "nvim-treesitter".install { "lua", "typescript", "python", "javascript", "cpp", "c", "java", "html", "css" }
+require "nvim-treesitter".install { "lua", "typescript", "python", "javascript", "cpp", "c", "java", "html", "css", "typescript", "tsx" }
+require "nvim-treesitter".setup({
+  highlight = { enable = true },
+  indent = { enable = true },
+})
 
 --- Telescope Setup ---
 require "telescope".setup({
@@ -138,16 +150,13 @@ map({ 'n' }, '<leader>lf', function()
     end
 
     local config = get_rubocop_config()
+    vim.cmd("write")
     vim.cmd(" !rubocop -a --config " .. vim.fn.shellescape(config) .. " " .. vim.fn.shellescape(file))
     vim.cmd("edit!")
   else
     vim.lsp.buf.format()
   end
 end, { desc = 'Format current buffer' })
-
-map({ 'n' }, '<leader>bb', function()
-  vim.diagnostic.open_float(0, { scope = "line" })
-end, { desc = 'Check current line error' })
 
 local cmp = require 'cmp'
 local luasnip = require 'luasnip'
@@ -225,4 +234,79 @@ vim.lsp.config('sorbet', {
     return vim.fn.expand("~/.config/sorbet-default")
   end,
 })
+
 vim.lsp.enable('sorbet')
+
+--- Typescript LSP ---
+vim.lsp.config('typescript-language-server',
+  {
+    cmd = { 'typescript-language-server', '--stdio' },
+    capabilities = capabilities,
+    filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
+    root_markers = { 'package.json', 'tsconfig.json', 'jsconfig.json', '.git' },
+  })
+
+vim.lsp.enable('typescript-language-server')
+
+--- Autopairs ---
+require "nvim-autopairs".setup({
+  check_ts = true
+})
+
+require 'cmp'.event:on('confirm_done',
+  require 'nvim-autopairs.completion.cmp'.on_confirm_done())
+
+require 'nvim-ts-autotag'.setup()
+
+--- Lualine
+require 'lualine'.setup({
+  options = {
+    icons_enabled = true,
+    theme = 'auto',
+    component_separators = { left = '', right = '' },
+    section_separators = { left = '', right = '' },
+    disabled_filetypes = {
+      statusline = {},
+      winbar = {},
+    },
+    ignore_focus = {},
+    always_divide_middle = true,
+    globalstatus = false,
+    refresh = {
+      statusline = 1000,
+      tabline = 1000,
+      winbar = 1000,
+    }
+  },
+  sections = {
+    lualine_a = { 'mode' },
+    lualine_b = { 'branch', 'diff', 'diagnostics' },
+    lualine_c = {},
+    lualine_x = { 'filename', 'filetype' },
+    lualine_y = {
+      {
+        'lsp_status',
+        icon = '❤',
+        symbols = {
+          spinner = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' },
+          done = '☺',
+          separator = ' ',
+        },
+        ignore_lsp = {},
+        show_name = true,
+      }
+    },
+    lualine_z = { 'location' }
+  },
+  inactive_sections = {
+    lualine_a = {},
+    lualine_b = {},
+    lualine_c = { 'filename' },
+    lualine_x = { 'location' },
+    lualine_y = {},
+    lualine_z = {}
+  },
+  tabline = {},
+  winbar = {},
+  extensions = {}
+})
