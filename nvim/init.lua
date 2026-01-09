@@ -252,8 +252,6 @@ vim.lsp.enable('typescript-language-server')
 require "nvim-autopairs".setup({
   check_ts = true
 })
-pcall(telescope.load_extension, "ui-select")
-pcall(telescope.load_extension, "env")
 
 require 'cmp'.event:on('confirm_done',
   require 'nvim-autopairs.completion.cmp'.on_confirm_done())
