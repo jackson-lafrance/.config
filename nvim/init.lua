@@ -151,7 +151,7 @@ map({ 'n' }, '<leader>lf', function()
 
     local config = get_rubocop_config()
     vim.cmd("write")
-    vim.cmd(" !rubocop -a --config " .. vim.fn.shellescape(config) .. " " .. vim.fn.shellescape(file))
+    vim.cmd(" !rubocop --config " .. vim.fn.shellescape(config) .. " " .. vim.fn.shellescape(file))
     vim.cmd("edit!")
   else
     vim.lsp.buf.format()
