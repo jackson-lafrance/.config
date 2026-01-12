@@ -37,7 +37,7 @@ map('n', '<leader>a', ':keepjumps normal! ggVG$<cr>', { desc = 'Select all text 
 map('n', '<CR>', '@="m`o<C-V><Esc>``"<CR>', { desc = 'Newline below' })
 map('n', '<S-CR>', '@="m`O<C-V><ESC>``"<CR>', { desc = 'Newline above' })
 
-map('n', '<leader>e', ':Lexplore<CR>', { desc = 'Open file explorer' })
+map('n', '<leader>e', ':Oil<CR>', { desc = 'Open file explorer' })
 map('n', '<leader>b', '<C-o>', { desc = 'Go back to previous jump' })
 
 map({ 'n', 'v', 'x' }, '<leader>vi', '<Cmd>edit $MYVIMRC<CR>', { desc = 'Edit ' .. vim.fn.expand('$MYVIMRC') })
@@ -68,13 +68,15 @@ vim.pack.add({
   { src = "https://github.com/windwp/nvim-autopairs" },
   { src = "https://github.com/windwp/nvim-ts-autotag" },
   { src = "https://github.com/nvim-lualine/lualine.nvim" },
+  { src = "https://github.com/chomosuke/typst-preview.nvim" },
+  { src = "https://github.com/stevearc/oil.nvim" },
 })
 
 --- Theme ---
 vim.cmd.colorscheme("rose-pine-main")
 
 --- Treesitter ---
-require "nvim-treesitter".install { "lua", "typescript", "python", "javascript", "cpp", "c", "java", "html", "css", "typescript", "tsx" }
+require "nvim-treesitter".install { "lua", "typescript", "python", "javascript", "cpp", "c", "java", "html", "css", "typst", "tsx" }
 require "nvim-treesitter".setup({
   highlight = { enable = true },
   indent = { enable = true },
@@ -176,7 +178,10 @@ cmp.setup({
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.abort(),
-    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+    ['<CR>'] = cmp.mapping.confirm({
+      behavior = cmp.ConfirmBehavior.Insert,
+      select = false,
+    }),
 
     ["<Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
@@ -310,3 +315,34 @@ require 'lualine'.setup({
   winbar = {},
   extensions = {}
 })
+
+
+--- Typst
+require 'typst-preview'.setup()
+
+
+vim.lsp.config('tinymist',
+  {
+    cmd = { 'tinymist', 'lsp' },
+    capabilities = capabilities,
+    filetypes = { 'typst' },
+    root_markers = { '.git' },
+    settings = { formatterMode = "typstyle", exportPdf = "onType", semanticTokens = "disable" },
+  })
+
+vim.lsp.enable('tinymist')
+
+vim.keymap.set("n", "<leader>p", ":TypstPreview<CR>")
+vim.keymap.set("n", "<leader>tp", ":write<CR> :!typst compile '%:p' --format=pdf<CR>")
+vim.keymap.set("n", "<leader>c", "1z=")
+
+vim.cmd([[
+  setlocal wrapmargin=10
+  setlocal formatoptions+=t
+  setlocal linebreak
+  setlocal spell
+  setlocal wrap
+]])
+
+--- Oil
+require "oil".setup()
