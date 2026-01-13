@@ -37,7 +37,7 @@ map('n', '<leader>a', ':keepjumps normal! ggVG$<cr>', { desc = 'Select all text 
 map('n', '<CR>', '@="m`o<C-V><Esc>``"<CR>', { desc = 'Newline below' })
 map('n', '<S-CR>', '@="m`O<C-V><ESC>``"<CR>', { desc = 'Newline above' })
 
-map('n', '<leader>e', ':Oil<CR>', { desc = 'Open file explorer' })
+map('n', '<leader>e', ':update<CR>:Oil<CR>', { desc = 'Open file explorer' })
 map('n', '<leader>b', '<C-o>', { desc = 'Go back to previous jump' })
 
 map({ 'n', 'v', 'x' }, '<leader>vi', '<Cmd>edit $MYVIMRC<CR>', { desc = 'Edit ' .. vim.fn.expand('$MYVIMRC') })
@@ -60,26 +60,27 @@ vim.pack.add({
   { src = "https://github.com/nvim-lua/plenary.nvim" },
   { src = "https://github.com/nvim-tree/nvim-web-devicons" },
   { src = "https://github.com/neovim/nvim-lspconfig" },
-  { src = "https://github.com/hrsh7th/nvim-cmp" },
-  { src = "https://github.com/L3MON4D3/LuaSnip" },
-  { src = "https://github.com/hrsh7th/cmp-nvim-lsp" },
-  { src = "https://github.com/hrsh7th/cmp-buffer" },
-  { src = "https://github.com/saadparwaiz1/cmp_luasnip" },
   { src = "https://github.com/windwp/nvim-autopairs" },
   { src = "https://github.com/windwp/nvim-ts-autotag" },
-  { src = "https://github.com/nvim-lualine/lualine.nvim" },
   { src = "https://github.com/chomosuke/typst-preview.nvim" },
-  { src = "https://github.com/stevearc/oil.nvim" },
+  { src = "https://github.com/https://github.com/stevearc/oil.nvim"}
 })
 
 --- Theme ---
 vim.cmd.colorscheme("rose-pine-main")
 
 --- Treesitter ---
-require "nvim-treesitter".install { "lua", "typescript", "python", "javascript", "cpp", "c", "java", "html", "css", "typst", "tsx" }
+require "nvim-treesitter".install { "lua", "typescript", "python", "javascript", "cpp", "c", "java", "html", "css", "typst", "tsx", "ruby", "vim" }
+
 require "nvim-treesitter".setup({
   highlight = { enable = true },
   indent = { enable = true },
+})
+
+vim.api.nvim_create_autocmd({"BufEnter", "BufWinEnter"}, {
+  callback = function()
+    pcall(vim.treesitter.start)
+  end,
 })
 
 --- Telescope Setup ---
@@ -129,10 +130,6 @@ map({ 'n' }, '<leader>gc', builtin.git_commits, { desc = 'Git commits' })
 map({ 'n' }, '<leader>sd', builtin.diagnostics, { desc = 'Diagnostics' })
 
 --- LSP and Completion ---
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
-vim.lsp.config('lua_ls', {
-  capabilities = capabilities
-})
 vim.lsp.enable('lua_ls')
 
 -- copied the ruby part from the internet
@@ -153,68 +150,16 @@ map({ 'n' }, '<leader>lf', function()
 
     local config = get_rubocop_config()
     vim.cmd("write")
-    vim.cmd(" !rubocop --config " .. vim.fn.shellescape(config) .. " " .. vim.fn.shellescape(file))
+    vim.cmd(" !rubocop -a --config " .. vim.fn.shellescape(config) .. " " .. vim.fn.shellescape(file))
     vim.cmd("edit!")
   else
     vim.lsp.buf.format()
   end
 end, { desc = 'Format current buffer' })
 
-local cmp = require 'cmp'
-local luasnip = require 'luasnip'
-
-cmp.setup({
-  snippet = {
-    expand = function(args)
-      luasnip.lsp_expand(args.body)
-    end,
-  },
-  window = {
-    completion = cmp.config.window.bordered(),
-    documentation = cmp.config.window.bordered(),
-  },
-  mapping = cmp.mapping.preset.insert({
-    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.abort(),
-    ['<CR>'] = cmp.mapping.confirm({
-      behavior = cmp.ConfirmBehavior.Insert,
-      select = false,
-    }),
-
-    ["<Tab>"] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { "i", "s" }),
-
-    ["<S-Tab>"] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { "i", "s" }),
-  }),
-  sources = cmp.config.sources({
-    { name = 'nvim_lsp' },
-    { name = 'luasnip' },
-  }, {
-    { name = 'buffer' },
-  })
-})
-
 --- Ruby LSP Setup --
 vim.lsp.config('ruby-lsp', {
   cmd = { 'ruby-lsp' },
-  capabilities = capabilities,
   filetypes = { 'ruby' },
   root_dir = vim.fs.root(0, { 'Gemfile', '.git' }),
   init_options = {
@@ -228,7 +173,6 @@ vim.lsp.enable('ruby-lsp')
 
 vim.lsp.config('sorbet', {
   cmd = { "srb", "tc", "--lsp" },
-  capabilities = capabilities,
   filetypes = { 'ruby' },
   root_dir = function(fname)
     local util = require('lspconfig.util')
@@ -246,7 +190,6 @@ vim.lsp.enable('sorbet')
 vim.lsp.config('typescript-language-server',
   {
     cmd = { 'typescript-language-server', '--stdio' },
-    capabilities = capabilities,
     filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
     root_markers = { 'package.json', 'tsconfig.json', 'jsconfig.json', '.git' },
   })
@@ -258,64 +201,7 @@ require "nvim-autopairs".setup({
   check_ts = true
 })
 
-require 'cmp'.event:on('confirm_done',
-  require 'nvim-autopairs.completion.cmp'.on_confirm_done())
-
 require 'nvim-ts-autotag'.setup()
-
---- Lualine
-require 'lualine'.setup({
-  options = {
-    icons_enabled = true,
-    theme = 'auto',
-    component_separators = { left = '', right = '' },
-    section_separators = { left = '', right = '' },
-    disabled_filetypes = {
-      statusline = {},
-      winbar = {},
-    },
-    ignore_focus = {},
-    always_divide_middle = true,
-    globalstatus = false,
-    refresh = {
-      statusline = 1000,
-      tabline = 1000,
-      winbar = 1000,
-    }
-  },
-  sections = {
-    lualine_a = { 'mode' },
-    lualine_b = { 'branch', 'diff', 'diagnostics' },
-    lualine_c = {},
-    lualine_x = { 'filename', 'filetype' },
-    lualine_y = {
-      {
-        'lsp_status',
-        icon = '❤',
-        symbols = {
-          spinner = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' },
-          done = '☺',
-          separator = ' ',
-        },
-        ignore_lsp = {},
-        show_name = true,
-      }
-    },
-    lualine_z = { 'location' }
-  },
-  inactive_sections = {
-    lualine_a = {},
-    lualine_b = {},
-    lualine_c = { 'filename' },
-    lualine_x = { 'location' },
-    lualine_y = {},
-    lualine_z = {}
-  },
-  tabline = {},
-  winbar = {},
-  extensions = {}
-})
-
 
 --- Typst
 require 'typst-preview'.setup()
@@ -324,7 +210,6 @@ require 'typst-preview'.setup()
 vim.lsp.config('tinymist',
   {
     cmd = { 'tinymist', 'lsp' },
-    capabilities = capabilities,
     filetypes = { 'typst' },
     root_markers = { '.git' },
     settings = { formatterMode = "typstyle", exportPdf = "onType", semanticTokens = "disable" },
