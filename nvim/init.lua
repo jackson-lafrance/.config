@@ -231,3 +231,7 @@ vim.cmd([[
 
 --- Oil
 require "oil".setup()
+
+--- C/C++/Python
+vim.lsp.enable('clangd')
+vim.lsp.enable('pyright')
