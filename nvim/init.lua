@@ -221,13 +221,19 @@ vim.keymap.set("n", "<leader>p", ":TypstPreview<CR>")
 vim.keymap.set("n", "<leader>tp", ":write<CR> :!typst compile '%:p' --format=pdf<CR>")
 vim.keymap.set("n", "<leader>c", "1z=")
 
-vim.cmd([[
-  setlocal wrapmargin=10
-  setlocal formatoptions+=t
-  setlocal linebreak
-  setlocal spell
-  setlocal wrap
-]])
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "typst",
+  callback = function()
+    vim.cmd([[
+    setlocal wrapmargin=10
+    setlocal formatoptions+=t
+    setlocal linebreak
+    setlocal spell
+    setlocal wrap
+    ]])
+  end,
+  desc = "Typst filetype commands"
+})
 
 --- Oil
 require "oil".setup()
