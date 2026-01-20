@@ -63,7 +63,7 @@ vim.pack.add({
   { src = "https://github.com/windwp/nvim-autopairs" },
   { src = "https://github.com/windwp/nvim-ts-autotag" },
   { src = "https://github.com/chomosuke/typst-preview.nvim" },
-  { src = "https://github.com/https://github.com/stevearc/oil.nvim"}
+  { src = "https://github.com/https://github.com/stevearc/oil.nvim" }
 })
 
 --- Theme ---
@@ -77,7 +77,7 @@ require "nvim-treesitter".setup({
   indent = { enable = true },
 })
 
-vim.api.nvim_create_autocmd({"BufEnter", "BufWinEnter"}, {
+vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
   callback = function()
     pcall(vim.treesitter.start)
   end,
@@ -241,3 +241,40 @@ require "oil".setup()
 --- C/C++/Python
 vim.lsp.enable('clangd')
 vim.lsp.enable('pyright')
+
+
+--- Completion
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('my.lsp', {}),
+  callback = function(args)
+    local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+    if client:supports_method('textDocument/completion') then
+      -- Optional: trigger autocompletion on EVERY keypress. May be slow!
+      local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
+      client.server_capabilities.completionProvider.triggerCharacters = chars
+      vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
+    end
+  end,
+})
+
+vim.cmd [[set completeopt+=menuone,noselect,popup]]
+
+vim.keymap.set('i', '<CR>', function()
+  if vim.fn.pumvisible() == 1 then
+    return vim.fn.complete_info().selected ~= -1 and '<C-y>' or '<CR>'
+  end
+  return '<CR>'
+end, { expr = true })
+vim.keymap.set('i', '<Tab>', function()
+  if vim.fn.pumvisible() == 1 then
+    return '<C-n>'
+  end
+ return '<Tab>'
+end, { expr = true })
+
+vim.keymap.set('i', '<S-Tab>', function()
+  if vim.fn.pumvisible() == 1 then
+    return '<C-p>'
+  end
+  return '<S-Tab>'
+end, { expr = true })
