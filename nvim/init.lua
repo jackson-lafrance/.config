@@ -4,7 +4,7 @@ local opt = vim.opt
 local map = vim.keymap.set
 
 --- Vim Settings ---
-vim.cmd(':hi statusline guibg=NONE')
+vim.cmd('hi statusline guibg=NONE')
 
 opt.number = true
 opt.relativenumber = true
@@ -14,12 +14,13 @@ opt.smartcase = true
 
 opt.wrap = false
 
-vim.opt.signcolumn = "yes"
+opt.signcolumn = "yes"
 
 opt.tabstop = 2
 opt.shiftwidth = 2
 opt.expandtab = true
 opt.autoindent = true
+opt.smartindent = true
 
 opt.termguicolors = true
 opt.winborder = 'rounded'
@@ -45,9 +46,9 @@ map({ 'n', 'v', 'x' }, '<leader>vi', '<Cmd>edit $MYVIMRC<CR>', { desc = 'Edit ' 
 map('n', '<leader>nh', ':nohlsearch<CR>', { desc = 'Unhighlight current search' })
 map({ 'v', 'x' }, '<leader>sw', 'y :/<C-r>"', { desc = 'Search for the current selected text' })
 
-map({ 'n' }, '<leader>1', ':!', { desc = 'Write a terminal command' })
+map('n', '<leader>1', ':!', { desc = 'Write a terminal command' })
 
-map({ 'n' }, '<leader>bb', function()
+map('n', '<leader>bb', function()
   vim.diagnostic.open_float(0, { scope = "line" })
 end, { desc = 'Check current line error' })
 
@@ -63,8 +64,16 @@ vim.pack.add({
   { src = "https://github.com/windwp/nvim-autopairs" },
   { src = "https://github.com/windwp/nvim-ts-autotag" },
   { src = "https://github.com/chomosuke/typst-preview.nvim" },
-  { src = "https://github.com/https://github.com/stevearc/oil.nvim" }
+  { src = "https://github.com/stevearc/oil.nvim" },
+  { src = "https://github.com/hrsh7th/nvim-cmp" },
+  { src = "https://github.com/hrsh7th/cmp-nvim-lsp" },
+  { src = "https://github.com/hrsh7th/cmp-buffer" },
+  { src = "https://github.com/L3MON4D3/LuaSnip" },
+  { src = "https://github.com/saadparwaiz1/cmp_luasnip" },
+  { src = "https://github.com/rafamadriz/friendly-snippets" },
 })
+
+require("luasnip.loaders.from_vscode").lazy_load()
 
 --- Theme ---
 vim.cmd.colorscheme("rose-pine-main")
@@ -75,12 +84,6 @@ require "nvim-treesitter".install { "lua", "typescript", "python", "javascript",
 require "nvim-treesitter".setup({
   highlight = { enable = true },
   indent = { enable = true },
-})
-
-vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
-  callback = function()
-    pcall(vim.treesitter.start)
-  end,
 })
 
 --- Telescope Setup ---
@@ -95,16 +98,7 @@ require "telescope".setup({
     preview = { treesitter = true },
     color_devicons = true,
     sorting_strategy = "ascending",
-    borderchars = {
-      "", -- top
-      "", -- right
-      "", -- bottom
-      "", -- left
-      "", -- top-left
-      "", -- top-right
-      "", -- bottom-right
-      "", -- bottom-left
-    },
+    borderchars = { "", "", "", "", "", "", "", "" },
     path_displays = { "smart" },
     layout_config = {
       height = 100,
@@ -119,22 +113,29 @@ require "telescope".load_extension("ui-select")
 local builtin = require("telescope.builtin")
 
 --- Telescope Keybinds ---
-map({ 'n' }, '<leader>f', builtin.find_files, { desc = 'Telescope find files' })
-map({ 'n' }, '<leader>g', builtin.live_grep, { desc = 'Telescope live grep' })
-map({ 'n' }, '<leader>of', builtin.oldfiles, { desc = 'Prev file viewer' })
-map({ 'n' }, '<leader>cs', builtin.commands, { desc = 'Command viewer' })
-map({ 'n' }, '<leader>ch', builtin.command_history, { desc = 'Command history' })
-map({ 'n' }, '<leader>gs', builtin.git_status, { desc = 'Git status' })
-map({ 'n' }, '<leader>gb', builtin.git_branches, { desc = 'Git branches' })
-map({ 'n' }, '<leader>gc', builtin.git_commits, { desc = 'Git commits' })
-map({ 'n' }, '<leader>sd', builtin.diagnostics, { desc = 'Diagnostics' })
+map('n', '<leader>f', builtin.find_files, { desc = 'Telescope find files' })
+map('n', '<leader>g', builtin.live_grep, { desc = 'Telescope live grep' })
+map('n', '<leader>of', builtin.oldfiles, { desc = 'Prev file viewer' })
+map('n', '<leader>cs', builtin.commands, { desc = 'Command viewer' })
+map('n', '<leader>ch', builtin.command_history, { desc = 'Command history' })
+map('n', '<leader>gs', builtin.git_status, { desc = 'Git status' })
+map('n', '<leader>gb', builtin.git_branches, { desc = 'Git branches' })
+map('n', '<leader>gc', builtin.git_commits, { desc = 'Git commits' })
+map('n', '<leader>sd', builtin.diagnostics, { desc = 'Diagnostics' })
 
 --- LSP and Completion ---
-vim.lsp.enable('lua_ls')
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+local function setup_lsp(name, config)
+  vim.lsp.config(name, vim.tbl_extend('force', { capabilities = capabilities }, config))
+  vim.lsp.enable(name)
+end
+
+setup_lsp('lua_ls', {})
 
 -- copied the ruby part from the internet
 -- it basically checks if there is a rubocop.yml in the current repro and otherwise it just uses my global one
-map({ 'n' }, '<leader>lf', function()
+map('n', '<leader>lf', function()
   if vim.bo.filetype == "ruby" then
     local file = vim.fn.expand("%:p")
     local function get_rubocop_config()
@@ -158,7 +159,7 @@ map({ 'n' }, '<leader>lf', function()
 end, { desc = 'Format current buffer' })
 
 --- Ruby LSP Setup --
-vim.lsp.config('ruby-lsp', {
+setup_lsp('ruby-lsp', {
   cmd = { 'ruby-lsp' },
   filetypes = { 'ruby' },
   root_dir = vim.fs.root(0, { 'Gemfile', '.git' }),
@@ -169,9 +170,7 @@ vim.lsp.config('ruby-lsp', {
   },
 })
 
-vim.lsp.enable('ruby-lsp')
-
-vim.lsp.config('sorbet', {
+setup_lsp('sorbet', {
   cmd = { "srb", "tc", "--lsp" },
   filetypes = { 'ruby' },
   root_dir = function(fname)
@@ -184,17 +183,18 @@ vim.lsp.config('sorbet', {
   end,
 })
 
-vim.lsp.enable('sorbet')
-
 --- Typescript LSP ---
-vim.lsp.config('typescript-language-server',
-  {
-    cmd = { 'typescript-language-server', '--stdio' },
-    filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
-    root_markers = { 'package.json', 'tsconfig.json', 'jsconfig.json', '.git' },
-  })
+vim.filetype.add({
+  extension = {
+    tsx = "typescriptreact",
+  },
+})
 
-vim.lsp.enable('typescript-language-server')
+setup_lsp('typescript-language-server', {
+  cmd = { 'typescript-language-server', '--stdio' },
+  filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
+  root_markers = { 'package.json', 'tsconfig.json', 'jsconfig.json', '.git' },
+})
 
 --- Autopairs ---
 require "nvim-autopairs".setup({
@@ -206,31 +206,30 @@ require 'nvim-ts-autotag'.setup()
 --- Typst
 require 'typst-preview'.setup()
 
+setup_lsp('tinymist', {
+  cmd = { 'tinymist', 'lsp' },
+  filetypes = { 'typst' },
+  root_markers = { '.git' },
+  settings = {
+    formatterMode = "typstyle",
+    exportPdf = "onType",
+    semanticTokens = "disable",
+  },
+})
 
-vim.lsp.config('tinymist',
-  {
-    cmd = { 'tinymist', 'lsp' },
-    filetypes = { 'typst' },
-    root_markers = { '.git' },
-    settings = { formatterMode = "typstyle", exportPdf = "onType", semanticTokens = "disable" },
-  })
-
-vim.lsp.enable('tinymist')
-
-vim.keymap.set("n", "<leader>p", ":TypstPreview<CR>")
-vim.keymap.set("n", "<leader>tp", ":write<CR> :!typst compile '%:p' --format=pdf<CR>")
-vim.keymap.set("n", "<leader>c", "1z=")
+map("n", "<leader>p", ":TypstPreview<CR>")
+map("n", "<leader>tp", ":write<CR> :!typst compile '%:p' --format=pdf<CR>")
+map("n", "<leader>c", "1z=")
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "typst",
   callback = function()
-    vim.cmd([[
-    setlocal wrapmargin=10
-    setlocal formatoptions+=t
-    setlocal linebreak
-    setlocal spell
-    setlocal wrap
-    ]])
+    local buf = vim.api.nvim_get_current_buf()
+    vim.bo[buf].wrapmargin = 10
+    vim.bo[buf].formatoptions:append('t')
+    vim.bo[buf].linebreak = true
+    vim.bo[buf].spell = true
+    vim.bo[buf].wrap = true
   end,
   desc = "Typst filetype commands"
 })
@@ -239,42 +238,48 @@ vim.api.nvim_create_autocmd("FileType", {
 require "oil".setup()
 
 --- C/C++/Python
-vim.lsp.enable('clangd')
-vim.lsp.enable('pyright')
+setup_lsp('pyright', {})
+setup_lsp('clangd', {})
 
 
 --- Completion
-vim.api.nvim_create_autocmd('LspAttach', {
-  group = vim.api.nvim_create_augroup('my.lsp', {}),
-  callback = function(args)
-    local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
-    if client:supports_method('textDocument/completion') then
-      -- Optional: trigger autocompletion on EVERY keypress. May be slow!
-      local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
-      client.server_capabilities.completionProvider.triggerCharacters = chars
-      vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
-    end
-  end,
+local cmp = require('cmp')
+local luasnip = require('luasnip')
+
+cmp.setup({
+  snippet = {
+    expand = function(args)
+      luasnip.lsp_expand(args.body)
+    end,
+  },
+
+  mapping = cmp.mapping.preset.insert({
+    ['<CR>'] = cmp.mapping.confirm({ select = false }),
+    ['<Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif luasnip.expand_or_jumpable() then
+        luasnip.expand_or_jump()
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+
+    ['<S-Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif luasnip.jumpable(-1) then
+        luasnip.jump(-1)
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+  }),
+
+  sources = {
+    { name = 'luasnip' },
+    { name = 'nvim_lsp'},
+    { name = 'buffer' },
+  },
 })
 
-vim.cmd [[set completeopt+=menuone,noselect,popup]]
-
-vim.keymap.set('i', '<CR>', function()
-  if vim.fn.pumvisible() == 1 then
-    return vim.fn.complete_info().selected ~= -1 and '<C-y>' or '<CR>'
-  end
-  return '<CR>'
-end, { expr = true })
-vim.keymap.set('i', '<Tab>', function()
-  if vim.fn.pumvisible() == 1 then
-    return '<C-n>'
-  end
- return '<Tab>'
-end, { expr = true })
-
-vim.keymap.set('i', '<S-Tab>', function()
-  if vim.fn.pumvisible() == 1 then
-    return '<C-p>'
-  end
-  return '<S-Tab>'
-end, { expr = true })
