@@ -10,8 +10,9 @@ setopt HIST_IGNORE_SPACE
 
 # Tab completion
 autoload -Uz compinit && compinit
-zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+setopt AUTO_MENU
+setopt COMPLETE_IN_WORD
 
 source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
 source /opt/homebrew/opt/chruby/share/chruby/auto.sh
@@ -82,8 +83,13 @@ git_prompt() {
 
 PROMPT='%F{blue}%~%f$(git_prompt) %F{magenta}❯%f '
 
-# Autosuggestions (grey text as you type)
+# Autosuggestions (Ctrl+Space to trigger, lighter color)
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=245'
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=0
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(accept-line)
+bindkey '^y' autosuggest-fetch  # Ctrl+Y to trigger
+bindkey '^[[Z' autosuggest-accept  # Shift+Tab to accept
 
 # Syntax highlighting (must be last)
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
