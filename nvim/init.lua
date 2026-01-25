@@ -52,6 +52,8 @@ map('n', '<leader>bb', function()
   vim.diagnostic.open_float(0, { scope = "line" })
 end, { desc = 'Check current line error' })
 
+map('n', '<leader>zm', ':ZenMode<CR>')
+
 --- Adding Plugins ---
 vim.pack.add({
   { src = "https://github.com/rose-pine/neovim" },
@@ -71,6 +73,7 @@ vim.pack.add({
   { src = "https://github.com/L3MON4D3/LuaSnip" },
   { src = "https://github.com/saadparwaiz1/cmp_luasnip" },
   { src = "https://github.com/rafamadriz/friendly-snippets" },
+  { src = "https://github.com/folke/zen-mode.nvim"}
 })
 
 require("luasnip.loaders.from_vscode").lazy_load()
