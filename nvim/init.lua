@@ -27,8 +27,9 @@ opt.winborder = 'rounded'
 
 --- Vim Bonus Keybindings ---
 vim.g.mapleader = ' '
-map('n', '<leader>w', ':write<CR>', { desc = 'Save' })
+map('n', '<leader>w', ':update<CR>', { desc = 'Save' })
 map('n', '<leader>so', ':update<CR> :so<CR>', { desc = 'Load changes from current file' })
+map('n', '<leader>q', ':update<CR> :quit<CR>', { desc = 'Save and quit'})
 
 map('', '<leader>y', '"+y', { desc = 'Copy to clipboard' })
 map('', '<leader>d', '"+d', { desc = 'Cut to clipboard' })
