@@ -118,7 +118,7 @@ local builtin = require("telescope.builtin")
 
 --- Telescope Keybinds ---
 map('n', '<leader>f', builtin.find_files, { desc = 'Telescope find files' })
-map('n', '<leader>g', builtin.live_grep, { desc = 'Telescope live grep' })
+map('n', '<leader>lg', builtin.live_grep, { desc = 'Telescope live grep' })
 map('n', '<leader>of', builtin.oldfiles, { desc = 'Prev file viewer' })
 map('n', '<leader>cs', builtin.commands, { desc = 'Command viewer' })
 map('n', '<leader>ch', builtin.command_history, { desc = 'Command history' })

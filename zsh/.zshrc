@@ -14,9 +14,6 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 setopt AUTO_MENU
 setopt COMPLETE_IN_WORD
 
-source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
-source /opt/homebrew/opt/chruby/share/chruby/auto.sh
-
 alias ga="git add"
 alias gr="git restore"
 alias gp="git push"
@@ -36,9 +33,9 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"
 [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && . "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
 
-alias python3='/opt/homebrew/bin/python3'
+[ -f /opt/dev/dev.sh ] && source /opt/dev/dev.sh
 
-chruby ruby-4.0.0 > /dev/null 2>&1
+alias python3='/opt/homebrew/bin/python3'
 
 tmux source-file ~/.config/tmux/tmux.conf
 
@@ -52,8 +49,8 @@ cd_to_dir() {
         cd "$dir/$selected_dir" || return 1
     fi
 }
-
-alias cdd='cd_to_dir ~/Desktop'
+alias cdq='cd_to_dir ~/Desktop/"Quick Sorted"'
+alias cdd='cd_to_dir ~/src/github.com/DevDegree'
 alias cds='cd_to_dir'
 
 # eza aliases (better ls)
