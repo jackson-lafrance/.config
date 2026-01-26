@@ -139,23 +139,37 @@ setup_lsp('lua_ls', {})
 
 -- copied the ruby part from the internet
 -- it basically checks if there is a rubocop.yml in the current repro and otherwise it just uses my global one
+local function get_rubocop_config()
+  local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+  if vim.v.shell_error == 0 and git_root then
+    local project_config = git_root .. "/.rubocop.yml"
+    if vim.fn.filereadable(project_config) == 1 then
+      return project_config
+    end
+  end
+  return vim.fn.expand("~/.rubocop.yml")
+end
+
+local function format_ruby_with_rubocop()
+  local file = vim.fn.expand("%:p")
+  local config = get_rubocop_config()
+  vim.fn.system("rubocop -a --config " .. vim.fn.shellescape(config) .. " " .. vim.fn.shellescape(file))
+end
+
+-- Format on save for Ruby files
+vim.api.nvim_create_autocmd("BufWritePost", {
+  pattern = "*.rb",
+  callback = function()
+    format_ruby_with_rubocop()
+    vim.cmd("edit!")
+  end,
+  desc = "Format Ruby files with Rubocop on save"
+})
+
 map('n', '<leader>lf', function()
   if vim.bo.filetype == "ruby" then
-    local file = vim.fn.expand("%:p")
-    local function get_rubocop_config()
-      local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
-      if vim.v.shell_error == 0 and git_root then
-        local project_config = git_root .. "/.rubocop.yml"
-        if vim.fn.filereadable(project_config) == 1 then
-          return project_config
-        end
-      end
-      return vim.fn.expand("~/.rubocop.yml")
-    end
-
-    local config = get_rubocop_config()
     vim.cmd("write")
-    vim.cmd(" !rubocop -a --config " .. vim.fn.shellescape(config) .. " " .. vim.fn.shellescape(file))
+    format_ruby_with_rubocop()
     vim.cmd("edit!")
   else
     vim.lsp.buf.format()
