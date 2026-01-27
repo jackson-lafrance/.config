@@ -165,6 +165,10 @@
       "rev": "1717b1ad657c94bec3fc2bdebb0c55452d9fe46d",
       "src": "https://github.com/datsfilipe/vesper.nvim"
     },
+    "vim-be-good": {
+      "rev": "0ae3de14eb8efc6effe7704b5e46495e91931cc5",
+      "src": "https://github.com/ThePrimeagen/vim-be-good"
+    },
     "zen-mode.nvim": {
       "rev": "8564ce6d29ec7554eb9df578efa882d33b3c23a7",
       "src": "https://github.com/folke/zen-mode.nvim"

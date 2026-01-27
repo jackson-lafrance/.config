@@ -74,7 +74,8 @@ vim.pack.add({
   { src = "https://github.com/L3MON4D3/LuaSnip" },
   { src = "https://github.com/saadparwaiz1/cmp_luasnip" },
   { src = "https://github.com/rafamadriz/friendly-snippets" },
-  { src = "https://github.com/folke/zen-mode.nvim"}
+  { src = "https://github.com/folke/zen-mode.nvim"},
+  { src = "https://github.com/ThePrimeagen/vim-be-good"}
 })
 
 require("luasnip.loaders.from_vscode").lazy_load()
@@ -83,7 +84,7 @@ require("luasnip.loaders.from_vscode").lazy_load()
 vim.cmd.colorscheme("rose-pine-main")
 
 --- Treesitter ---
-require "nvim-treesitter".install { "lua", "typescript", "python", "javascript", "cpp", "c", "java", "html", "css", "typst", "tsx", "ruby", "vim" }
+require "nvim-treesitter".install { "lua", "typescript", "python", "javascript", "cpp", "c", "java", "html", "css", "typst", "tsx", "ruby", "vim", "embedded_template" }
 
 require "nvim-treesitter".setup({
   highlight = { enable = true },
@@ -179,7 +180,7 @@ end, { desc = 'Format current buffer' })
 --- Ruby LSP Setup --
 setup_lsp('ruby-lsp', {
   cmd = { 'ruby-lsp' },
-  filetypes = { 'ruby' },
+  filetypes = { 'ruby', 'eruby' },
   root_dir = vim.fs.root(0, { 'Gemfile', '.git' }),
   init_options = {
     formatter = 'standard',
