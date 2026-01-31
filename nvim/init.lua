@@ -243,12 +243,11 @@ map("n", "<leader>c", "1z=")
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "typst",
   callback = function()
-    local buf = vim.api.nvim_get_current_buf()
-    vim.bo[buf].wrapmargin = 10
-    vim.bo[buf].formatoptions:append('t')
-    vim.bo[buf].linebreak = true
-    vim.bo[buf].spell = true
-    vim.bo[buf].wrap = true
+    vim.opt_local.wrapmargin = 10
+    vim.opt_local.formatoptions:append('t')
+    vim.opt_local.linebreak = true
+    vim.opt_local.spell = true
+    vim.opt_local.wrap = true
   end,
   desc = "Typst filetype commands"
 })

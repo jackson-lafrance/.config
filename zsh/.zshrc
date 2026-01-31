@@ -36,6 +36,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -f /opt/dev/dev.sh ] && source /opt/dev/dev.sh
 
 alias python3='/opt/homebrew/bin/python3'
+export PATH="$HOME/.local/bin:$PATH"
 
 tmux source-file ~/.config/tmux/tmux.conf
 
