@@ -28,6 +28,7 @@ alias gcm="git commit -m"
 alias nrd="npm run dev"
 alias nrs="npm run start"
 alias nrc="npm run compile"
+alias vim="nvim"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"
@@ -50,9 +51,21 @@ cd_to_dir() {
         cd "$dir/$selected_dir" || return 1
     fi
 }
-alias cdq='cd_to_dir ~/Desktop/"Quick Sorted"'
+alias cdq='cd_to_dir ~/slaade'
 alias cdd='cd_to_dir ~/src/github.com/DevDegree'
 alias cds='cd_to_dir'
+
+# tmux session picker (fzf)
+tmx() {
+  local session
+  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --height 50% --prompt 'session> ')
+  [[ -z "$session" ]] && return
+  if [[ -n "$TMUX" ]]; then
+    tmux switch-client -t "$session"
+  else
+    tmux attach-session -t "$session"
+  fi
+}
 
 # eza aliases (better ls)
 alias ls='eza --icons'
@@ -89,8 +102,10 @@ ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(accept-line)
 bindkey '^y' autosuggest-fetch  # Ctrl+Y to trigger
 bindkey '^[[Z' autosuggest-accept  # Shift+Tab to accept
 
-# Syntax highlighting (must be last)
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source ~/.config/ollama/commands.zsh
 
 # Added by tec agent
 [[ -x /Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init ]] && eval "$(/Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init zsh)"
+
+# Syntax highlighting (must be last)
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
