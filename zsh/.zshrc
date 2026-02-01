@@ -29,6 +29,7 @@ alias nrd="npm run dev"
 alias nrs="npm run start"
 alias nrc="npm run compile"
 alias vim="nvim"
+alias sz='source ~/.config/zsh/.zshrc'
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"

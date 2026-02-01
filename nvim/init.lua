@@ -43,6 +43,7 @@ map('n', '<leader>e', ':update<CR>:Oil<CR>', { desc = 'Open file explorer' })
 map('n', '<leader>b', '<C-o>', { desc = 'Go back to previous jump' })
 
 map({ 'n', 'v', 'x' }, '<leader>vi', '<Cmd>edit $MYVIMRC<CR>', { desc = 'Edit ' .. vim.fn.expand('$MYVIMRC') })
+map('n', '<leader>sv', '<Cmd>source $MYVIMRC<CR>', { desc = 'Source Neovim config' })
 
 map('n', '<leader>nh', ':nohlsearch<CR>', { desc = 'Unhighlight current search' })
 map({ 'v', 'x' }, '<leader>sw', 'y :/<C-r>"', { desc = 'Search for the current selected text' })
@@ -75,7 +76,8 @@ vim.pack.add({
   { src = "https://github.com/saadparwaiz1/cmp_luasnip" },
   { src = "https://github.com/rafamadriz/friendly-snippets" },
   { src = "https://github.com/folke/zen-mode.nvim"},
-  { src = "https://github.com/ThePrimeagen/vim-be-good"}
+  { src = "https://github.com/ThePrimeagen/vim-be-good"},
+  { src = "https://github.com/akinsho/toggleterm.nvim" }
 })
 
 require("luasnip.loaders.from_vscode").lazy_load()
@@ -300,4 +302,30 @@ cmp.setup({
     { name = 'buffer' },
   },
 })
+
+--- ToggleTerm (floating terminal) ---
+require("toggleterm").setup({
+  size = 15,
+  open_mapping = nil,
+  shade_terminals = true,
+  start_in_insert = true,
+  persist_size = true,
+  direction = "horizontal",
+  float_opts = {
+    border = "rounded",
+    width = 20,
+    height = 5,
+  },
+})
+
+local Terminal = require("toggleterm.terminal").Terminal
+local tmx_term = Terminal:new({
+  cmd = "zsh -i -c tmx",
+  direction = "float",
+  close_on_exit = true,
+})
+
+map("n", "<leader>0", function()
+  tmx_term:toggle()
+end, { desc = "Switch tmux sessions" })
 
