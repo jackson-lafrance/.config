@@ -41,6 +41,7 @@ map('n', '<S-CR>', '@="m`O<C-V><ESC>``"<CR>', { desc = 'Newline above' })
 
 map('n', '<leader>e', ':update<CR>:Oil<CR>', { desc = 'Open file explorer' })
 map('n', '<leader>b', '<C-o>', { desc = 'Go back to previous jump' })
+map('n', '<leader>ie', 'gg=G<C-o>zz', { desc = 'Indent whole file'})
 
 map({ 'n', 'v', 'x' }, '<leader>vi', '<Cmd>edit $MYVIMRC<CR>', { desc = 'Edit ' .. vim.fn.expand('$MYVIMRC') })
 map('n', '<leader>sv', '<Cmd>source $MYVIMRC<CR>', { desc = 'Source Neovim config' })
