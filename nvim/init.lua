@@ -24,6 +24,7 @@ opt.smartindent = true
 
 opt.termguicolors = true
 opt.winborder = 'rounded'
+opt.guicursor = ''
 
 --- Vim Bonus Keybindings ---
 vim.g.mapleader = ' '
