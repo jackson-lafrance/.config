@@ -108,7 +108,5 @@ source ~/.config/ollama/commands.zsh
 # Added by tec agent
 [[ -x /Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init ]] && eval "$(/Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init zsh)"
 
-eval "$(rbenv init -)"
-
 # Syntax highlighting (must be last)
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
