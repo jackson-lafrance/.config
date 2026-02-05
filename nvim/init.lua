@@ -17,14 +17,12 @@ opt.signcolumn = "yes"
 
 opt.ignorecase = true
 opt.smartcase = true
-
 opt.wrap = false
 opt.tabstop = 2
 opt.shiftwidth = 2
 opt.expandtab = true
 opt.autoindent = true
 opt.smartindent = true
-
 opt.termguicolors = true
 opt.winborder = 'rounded'
 opt.guicursor = ''
@@ -52,6 +50,14 @@ vim.pack.add({
   { src = "https://github.com/windwp/nvim-autopairs" },
   { src = "https://github.com/windwp/nvim-ts-autotag" },
 
+  { src = "https://github.com/hrsh7th/nvim-cmp" },
+  { src = "https://github.com/hrsh7th/cmp-nvim-lsp" },
+  { src = "https://github.com/hrsh7th/cmp-buffer" },
+  { src = "https://github.com/hrsh7th/cmp-path" },
+  { src = "https://github.com/saadparwaiz1/cmp_luasnip" },
+  { src = "https://github.com/L3MON4D3/LuaSnip" },
+  { src = "https://github.com/rafamadriz/friendly-snippets" },
+
   { src = "https://github.com/chomosuke/typst-preview.nvim" },
 
   { src = "https://github.com/akinsho/toggleterm.nvim" },
@@ -74,21 +80,6 @@ require "mason".setup()
 require "mason-lspconfig".setup({
   automatic_installation = true,
 })
-
-vim.api.nvim_create_autocmd('LspAttach', {
-  group = vim.api.nvim_create_augroup('my.lsp', {}),
-  callback = function(args)
-    local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
-    if client:supports_method('textDocument/completion') then
-      -- Optional: trigger autocompletion on EVERY keypress. May be slow!
-      local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
-      client.server_capabilities.completionProvider.triggerCharacters = chars
-      vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
-    end
-  end,
-})
-
-vim.cmd [[set completeopt+=menuone,noselect,popup]]
 
 vim.lsp.enable({
   "rust_analyzer",
@@ -173,6 +164,80 @@ require "nvim-autopairs".setup({
 
 require "nvim-ts-autotag".setup()
 
+--- LuaSnip ---
+local luasnip = require("luasnip")
+require("luasnip.loaders.from_vscode").lazy_load()
+require("luasnip.loaders.from_lua").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets" } })
+
+--- Cmp setup ---
+local cmp = require("cmp")
+
+cmp.setup({
+  snippet = {
+    expand = function(args)
+      luasnip.lsp_expand(args.body)
+    end,
+  },
+
+  window = {
+    completion = cmp.config.window.bordered(),
+    documentation = cmp.config.window.bordered(),
+  },
+
+  mapping = cmp.mapping.preset.insert({
+    ['<Down>'] = cmp.mapping(function(fallback) fallback() end, { 'i', 's' }),
+    ['<Up>'] = cmp.mapping(function(fallback) fallback() end, { 'i', 's' }),
+    ['<C-n>'] = cmp.mapping.select_next_item(),
+    ['<C-p>'] = cmp.mapping.select_prev_item(),
+    ['<C-u>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-d>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.abort(),
+    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+    ['<Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif luasnip.expand_or_jumpable() then
+        luasnip.expand_or_jump()
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+    ['<S-Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif luasnip.jumpable(-1) then
+        luasnip.jump(-1)
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+  }),
+
+  sources = cmp.config.sources({
+    { name = 'nvim_lsp' },
+    { name = 'luasnip' },
+    { name = 'path' },
+  }, {
+    { name = 'buffer' },
+  }),
+
+  formatting = {
+    format = function(entry, vim_item)
+      vim_item.menu = ({
+        nvim_lsp = "[LSP]",
+        luasnip = "[Snip]",
+        buffer = "[Buf]",
+        path = "[Path]",
+      })[entry.source.name]
+      return vim_item
+    end,
+  },
+})
+
+local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+
 --- Typst
 require 'typst-preview'.setup()
 
@@ -251,7 +316,7 @@ map("n", "<leader>c", "1z=")
 --- Telescope Keybinds ---
 map('n', '<leader>ff', builtin.find_files, { desc = 'Telescope find files' })
 map('n', '<leader>fw', builtin.live_grep, { desc = 'Telescope live grep' })
-map('n', '<leader>ch', builtin.command_history, { desc = 'Command history' })
+map('n', '<leader>fc', builtin.command_history, { desc = 'Command history' })
 map('n', '<leader>gs', builtin.git_status, { desc = 'Git status' })
 map('n', '<leader>gb', builtin.git_branches, { desc = 'Git branches' })
 map('n', '<leader>gc', builtin.git_commits, { desc = 'Git commits' })
