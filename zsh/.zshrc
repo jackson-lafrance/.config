@@ -108,6 +108,7 @@ source ~/.config/ollama/commands.zsh
 # Added by tec agent
 [[ -x /Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init ]] && eval "$(/Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init zsh)"
 
+source $(brew --prefix)/opt/chruby/share/chruby/auto.sh
 eval('chruby 4.0.0')
 
 # Syntax highlighting (must be last)
