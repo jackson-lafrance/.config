@@ -2,7 +2,6 @@
 local vim = vim
 local opt = vim.opt
 local map = vim.keymap.set
-
 vim.g.mapleader = ' '
 --- Vim Commands ---
 vim.cmd('hi statusline guibg=NONE')
@@ -201,6 +200,10 @@ cmp.setup({
     end,
   },
 
+  completion = {
+    preselect = cmp.PreselectMode.None,
+  },
+
   window = {
     completion = cmp.config.window.bordered(),
     documentation = cmp.config.window.bordered(),
@@ -215,7 +218,18 @@ cmp.setup({
     ['<C-d>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.abort(),
-    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+    ['<CR>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        local entry = cmp.get_selected_entry()
+        if entry then
+          cmp.confirm({ select = true })
+        else
+          fallback()
+        end
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
     ['<Tab>'] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
