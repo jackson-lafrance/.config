@@ -76,6 +76,7 @@ require "nvim-treesitter".setup({
 require "oil".setup()
 
 --- LSP Setup ---
+vim.cmd("packadd! nvim-lspconfig") -- so lsp/*.lua configs (cmd, filetypes) are on rtp
 require "mason".setup()
 require "mason-lspconfig".setup({
   automatic_installation = true,
@@ -98,7 +99,9 @@ require "mason-lspconfig".setup({
   },
 })
 
-vim.lsp.enable({
+-- Register config for each server so vim.lsp.enable() can find them (required in Neovim 0.11+).
+-- nvim-lspconfig provides cmd/filetypes via lsp/name.lua; we only need to register so enable() works.
+local lsp_servers = {
   "rust_analyzer",
   "tinymist",
   "bashls",
@@ -109,7 +112,22 @@ vim.lsp.enable({
   "eslint",
   "ruby_lsp",
   "sqlls",
+}
+for _, name in ipairs(lsp_servers) do
+  vim.lsp.config(name, {})
+end
+
+-- ruby_lsp: filetypes, root, and disable semantic tokens to avoid NO_RESULT_CALLBACK_FOUND errors
+vim.lsp.config("ruby_lsp", {
+  filetypes = { "ruby", "eruby", "erb" },
+  root_markers = { "Gemfile", ".git" },
+  capabilities = {
+    textDocument = { semanticTokens = vim.NIL },
+    workspace = { semanticTokens = vim.NIL },
+  },
 })
+
+vim.lsp.enable(lsp_servers)
 
 --- Formatter Setup ---
 require("conform").setup({
@@ -304,6 +322,17 @@ require("toggleterm").setup({
   },
 })
 
+-- Terminal: Escape to normal mode (scroll with j/k), mouse to scroll, q to close buffer
+vim.api.nvim_create_autocmd("TermOpen", {
+  pattern = "*",
+  callback = function()
+    vim.opt_local.mouse = "a"
+    vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { buffer = 0, desc = "Terminal: normal mode (scroll with j/k)" })
+    vim.keymap.set("n", "q", "<Cmd>bdelete!<CR>", { buffer = 0, desc = "Close terminal buffer" })
+  end,
+  desc = "Terminal: scroll + close",
+})
+
 local Terminal = require "toggleterm.terminal".Terminal
 
 local tmx_term = Terminal:new({
@@ -336,7 +365,63 @@ map('n', '<leader>bb', function()
   vim.diagnostic.open_float(0, { scope = "line" })
 end, { desc = 'Check current line error' })
 
-map('n', '<leader>lf', function() require("conform").format() end, { desc = 'Format buffer' })
+--- Rails: project root + run command in terminal (must be defined before keymaps that use them) ---
+vim.cmd("silent! packadd vim-rails")
+
+local function rails_root()
+  local br = vim.b.rails_root
+  if br and br ~= "" then
+    return br
+  end
+  local dir = vim.fn.expand("%:p:h")
+  local tried = {}
+  for _ = 1, 30 do
+    if dir == "" or dir == "." or tried[dir] then
+      break
+    end
+    tried[dir] = true
+    if vim.fn.filereadable(dir .. "/Gemfile") == 1 then
+      return dir
+    end
+    dir = vim.fn.fnamemodify(dir, ":h")
+  end
+  return ""
+end
+
+local function is_rspec_project(root)
+  return vim.fn.isdirectory(root .. "/spec") == 1
+end
+
+local function run_in_rails_terminal(cmd)
+  local root = rails_root()
+  if root == "" then
+    vim.notify("Not in a Rails/Ruby project (no Gemfile found)", vim.log.levels.WARN)
+    return
+  end
+  local Terminal = require("toggleterm.terminal").Terminal
+  local full_cmd = "cd " .. vim.fn.shellescape(root) .. " && (" .. cmd .. "); exec $SHELL -i"
+  local term = Terminal:new({
+    cmd = full_cmd,
+    direction = "horizontal",
+    close_on_exit = false,
+  })
+  term:toggle()
+end
+
+map("n", "<leader>lf", function()
+  local ft = vim.bo.filetype
+  if ft == "ruby" or ft == "erb" then
+    local root = rails_root()
+    if root == "" then
+      vim.notify("Not in a Rails/Ruby project (no Gemfile found)", vim.log.levels.WARN)
+      return
+    end
+    local file = vim.fn.shellescape(vim.fn.expand("%:p"))
+    run_in_rails_terminal("bundle exec rubocop -a " .. file)
+  else
+    require("conform").format()
+  end
+end, { desc = "Format buffer (RuboCop in terminal for Ruby/ERB)" })
 
 --- Terminal Keybinds ---
 map("n", "<leader>0", function()
@@ -357,3 +442,30 @@ map('n', '<leader>gs', builtin.git_status, { desc = 'Git status' })
 map('n', '<leader>gb', builtin.git_branches, { desc = 'Git branches' })
 map('n', '<leader>gc', builtin.git_commits, { desc = 'Git commits' })
 map('n', '<leader>sd', builtin.diagnostics, { desc = 'Diagnostics' })
+
+--- Rails test keybinds (in test/spec files) ---
+map("n", "<leader>tf", function()
+  local root = rails_root()
+  if root == "" then
+    vim.notify("Not in a Rails project", vim.log.levels.WARN)
+    return
+  end
+  local file = vim.fn.expand("%:p")
+  if not file:match("_test%.rb$") and not file:match("_spec%.rb$") then
+    vim.notify("Not a test file (expect _test.rb or _spec.rb)", vim.log.levels.WARN)
+    return
+  end
+  local cmd = file:match("_spec%.rb$") and "bundle exec rspec " .. vim.fn.shellescape(file)
+    or "bundle exec rails test " .. vim.fn.shellescape(file)
+  run_in_rails_terminal(cmd)
+end, { desc = "Rails: run current test file" })
+
+map("n", "<leader>ts", function()
+  local root = rails_root()
+  if root == "" then
+    vim.notify("Not in a Rails project", vim.log.levels.WARN)
+    return
+  end
+  local cmd = is_rspec_project(root) and "bundle exec rspec" or "bundle exec rails test"
+  run_in_rails_terminal(cmd)
+end, { desc = "Rails: run whole test suite" })
