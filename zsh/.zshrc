@@ -1,5 +1,7 @@
 # ln -s ~/.config/zsh/.zshrc ~/.zshrc remember this command when pulling repo
 
+export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+
 # History
 HISTSIZE=10000
 SAVEHIST=10000
@@ -40,7 +42,7 @@ export NVM_DIR="$HOME/.nvm"
 alias python3='/opt/homebrew/bin/python3'
 export PATH="$HOME/.local/bin:$PATH"
 
-tmux source-file ~/.config/tmux/tmux.conf
+[[ -n "$TMUX" ]] && tmux source-file ~/.config/tmux/tmux.conf
 
 source <(fzf --zsh)
 
@@ -110,7 +112,7 @@ source ~/.config/ollama/commands.zsh
 
 source $(brew --prefix)/opt/chruby/share/chruby/chruby.sh
 source $(brew --prefix)/opt/chruby/share/chruby/auto.sh
-chruby 4.0.0
+chruby 4.0.1
 
 # Syntax highlighting (must be last)
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
