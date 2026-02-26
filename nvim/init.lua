@@ -38,6 +38,7 @@ vim.pack.add({
   { src = "https://github.com/stevearc/oil.nvim" },
 
   { src = "https://github.com/mason-org/mason.nvim" },
+  { src = "https://github.com/neovim/nvim-lspconfig" },
   { src = "https://github.com/mason-org/mason-lspconfig.nvim" },
   { src = "https://github.com/stevearc/conform.nvim" },
 
@@ -79,6 +80,23 @@ require "oil".setup()
 require "mason".setup()
 require "mason-lspconfig".setup({
   automatic_installation = true,
+  ensure_installed = {
+    "bashls",
+    "clangd",
+    "eslint",
+    "lua_ls",
+    "pyright",
+    "ruby_lsp",
+    "rust_analyzer",
+    "sqlls",
+    "tinymist",
+    "ts_ls",
+  },
+  handlers = {
+    function(server_name)
+      require("lspconfig")[server_name].setup({})
+    end,
+  },
 })
 
 vim.lsp.enable({
