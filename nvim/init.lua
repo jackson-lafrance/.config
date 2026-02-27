@@ -79,14 +79,13 @@ require "oil".setup()
 vim.cmd("packadd! nvim-lspconfig") -- so lsp/*.lua configs (cmd, filetypes) are on rtp
 require "mason".setup()
 require "mason-lspconfig".setup({
-  automatic_installation = true,
+  automatic_installation = { exclude = { "ruby_lsp" } },
   ensure_installed = {
     "bashls",
     "clangd",
     "eslint",
     "lua_ls",
     "pyright",
-    "ruby_lsp",
     "rust_analyzer",
     "sqlls",
     "tinymist",
@@ -119,6 +118,7 @@ end
 
 -- ruby_lsp: filetypes, root, and disable semantic tokens to avoid NO_RESULT_CALLBACK_FOUND errors
 vim.lsp.config("ruby_lsp", {
+  cmd = { vim.fn.expand("~/.local/bin/ruby-lsp-wrapper") },
   filetypes = { "ruby", "eruby", "erb" },
   root_markers = { "Gemfile", ".git" },
   capabilities = {
