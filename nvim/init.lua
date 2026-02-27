@@ -469,3 +469,10 @@ map("n", "<leader>ts", function()
   local cmd = is_rspec_project(root) and "bundle exec rspec" or "bundle exec rails test"
   run_in_rails_terminal(cmd)
 end, { desc = "Rails: run whole test suite" })
+
+map("n", "<leader>tl", function()
+  local root = rails_root()
+  if root == "" then vim.notify("Not in a Rails project", vim.log.levels.WARN); return end
+  local rel = vim.fn.expand("%:p"):sub(#root + 2)
+  run_in_rails_terminal("dev test " .. rel .. ":" .. vim.fn.line("."))
+end, { desc = "Rails: run test at cursor line" })
