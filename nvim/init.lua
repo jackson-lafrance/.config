@@ -366,8 +366,6 @@ map('n', '<leader>bb', function()
 end, { desc = 'Check current line error' })
 
 --- Rails: project root + run command in terminal (must be defined before keymaps that use them) ---
-vim.cmd("silent! packadd vim-rails")
-
 local function rails_root()
   local br = vim.b.rails_root
   if br and br ~= "" then
@@ -388,40 +386,15 @@ local function rails_root()
   return ""
 end
 
-local function is_rspec_project(root)
-  return vim.fn.isdirectory(root .. "/spec") == 1
-end
-
-local function run_in_rails_terminal(cmd)
-  local root = rails_root()
-  if root == "" then
-    vim.notify("Not in a Rails/Ruby project (no Gemfile found)", vim.log.levels.WARN)
-    return
-  end
-  local Terminal = require("toggleterm.terminal").Terminal
-  local full_cmd = "cd " .. vim.fn.shellescape(root) .. " && (" .. cmd .. "); exec $SHELL -i"
-  local term = Terminal:new({
-    cmd = full_cmd,
-    direction = "horizontal",
-    close_on_exit = false,
-  })
-  term:toggle()
-end
-
 map("n", "<leader>lf", function()
-  local ft = vim.bo.filetype
-  if ft == "ruby" or ft == "erb" then
+  if vim.bo.filetype == "ruby" or vim.bo.filetype == "erb" then
     local root = rails_root()
-    if root == "" then
-      vim.notify("Not in a Rails/Ruby project (no Gemfile found)", vim.log.levels.WARN)
-      return
-    end
-    local file = vim.fn.shellescape(vim.fn.expand("%:p"))
-    run_in_rails_terminal("bundle exec rubocop -a " .. file)
+    if root == "" then vim.notify("Not in a Rails project", vim.log.levels.WARN); return end
+    vim.cmd("!" .. "cd " .. vim.fn.shellescape(root) .. " && bundle exec rubocop -a " .. vim.fn.expand("%:p"))
   else
     require("conform").format()
   end
-end, { desc = "Format buffer (RuboCop in terminal for Ruby/ERB)" })
+end, { desc = "Format buffer" })
 
 --- Terminal Keybinds ---
 map("n", "<leader>0", function()
@@ -444,35 +417,18 @@ map('n', '<leader>gc', builtin.git_commits, { desc = 'Git commits' })
 map('n', '<leader>sd', builtin.diagnostics, { desc = 'Diagnostics' })
 
 --- Rails test keybinds (in test/spec files) ---
-map("n", "<leader>tf", function()
-  local root = rails_root()
-  if root == "" then
-    vim.notify("Not in a Rails project", vim.log.levels.WARN)
-    return
-  end
-  local file = vim.fn.expand("%:p")
-  if not file:match("_test%.rb$") and not file:match("_spec%.rb$") then
-    vim.notify("Not a test file (expect _test.rb or _spec.rb)", vim.log.levels.WARN)
-    return
-  end
-  local cmd = file:match("_spec%.rb$") and "bundle exec rspec " .. vim.fn.shellescape(file)
-    or "bundle exec rails test " .. vim.fn.shellescape(file)
-  run_in_rails_terminal(cmd)
-end, { desc = "Rails: run current test file" })
+local function run_test(cmd)
+  vim.cmd("botright 15split | term " .. cmd)
+end
 
-map("n", "<leader>ts", function()
-  local root = rails_root()
-  if root == "" then
-    vim.notify("Not in a Rails project", vim.log.levels.WARN)
-    return
-  end
-  local cmd = is_rspec_project(root) and "bundle exec rspec" or "bundle exec rails test"
-  run_in_rails_terminal(cmd)
-end, { desc = "Rails: run whole test suite" })
+vim.keymap.set("n", "<leader>tf", function()
+  run_test("dev test " .. vim.fn.expand("%:."))
+end)
 
-map("n", "<leader>tl", function()
-  local root = rails_root()
-  if root == "" then vim.notify("Not in a Rails project", vim.log.levels.WARN); return end
-  local rel = vim.fn.expand("%:p"):sub(#root + 2)
-  run_in_rails_terminal("dev test " .. rel .. ":" .. vim.fn.line("."))
-end, { desc = "Rails: run test at cursor line" })
+vim.keymap.set("n", "<leader>tl", function()
+  run_test("dev test " .. vim.fn.expand("%:.") .. ":" .. vim.fn.line("."))
+end)
+
+vim.keymap.set("n", "<leader>ts", function()
+  run_test("dev test")
+end)
