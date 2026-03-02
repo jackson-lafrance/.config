@@ -5,8 +5,6 @@ local map = vim.keymap.set
 vim.g.mapleader = ' '
 --- Vim Commands ---
 vim.cmd('hi statusline guibg=NONE')
-vim.cmd([[set mouse=]])
-vim.cmd([[set noswapfile]])
 vim.cmd([[hi @lsp.type.number gui=italic]])
 
 --- Vim Settings ---
@@ -16,16 +14,22 @@ opt.signcolumn = "yes"
 
 opt.ignorecase = true
 opt.smartcase = true
+
 opt.wrap = false
+
 opt.tabstop = 2
 opt.shiftwidth = 2
 opt.expandtab = true
 opt.autoindent = true
 opt.smartindent = true
+
 opt.termguicolors = true
 opt.winborder = 'rounded'
-opt.guicursor = ''
 
+opt.guicursor = ''
+opt.mouse = ""
+
+opt.swapfile = false
 vim.opt.undofile = true
 
 --- Adding Plugins ---
@@ -61,6 +65,8 @@ vim.pack.add({
   { src = "https://github.com/chomosuke/typst-preview.nvim" },
 
   { src = "https://github.com/akinsho/toggleterm.nvim" },
+  { src = "https://github.com/chentoast/marks.nvim" },
+  { src = "https://github.com/nvim-mini/mini.diff" },
 
   { src = "https://github.com/tpope/vim-rails" },
 })
@@ -73,48 +79,27 @@ require "nvim-treesitter".setup({
   auto_install = true
 })
 
+require 'marks'.setup()
+require 'mini.diff'.setup()
 require "oil".setup()
 
 --- LSP Setup ---
-vim.cmd("packadd! nvim-lspconfig") -- so lsp/*.lua configs (cmd, filetypes) are on rtp
 require "mason".setup()
 require "mason-lspconfig".setup({
   automatic_installation = { exclude = { "ruby_lsp" } },
   ensure_installed = {
-    "bashls",
-    "clangd",
-    "eslint",
-    "lua_ls",
-    "pyright",
-    "rust_analyzer",
-    "sqlls",
-    "tinymist",
-    "ts_ls",
+    "bashls", "clangd", "eslint", "lua_ls", "pyright",
+    "rust_analyzer", "sqlls", "tinymist", "ts_ls",
   },
   handlers = {
-    function(server_name)
-      require("lspconfig")[server_name].setup({})
-    end,
+    function(server_name) require("lspconfig")[server_name].setup({}) end,
   },
 })
 
--- Register config for each server so vim.lsp.enable() can find them (required in Neovim 0.11+).
--- nvim-lspconfig provides cmd/filetypes via lsp/name.lua; we only need to register so enable() works.
 local lsp_servers = {
-  "rust_analyzer",
-  "tinymist",
-  "bashls",
-  "pyright",
-  "lua_ls",
-  "clangd",
-  "ts_ls",
-  "eslint",
-  "ruby_lsp",
-  "sqlls",
+  "rust_analyzer", "tinymist", "bashls", "pyright", "lua_ls",
+  "clangd", "ts_ls", "eslint", "ruby_lsp", "sqlls",
 }
-for _, name in ipairs(lsp_servers) do
-  vim.lsp.config(name, {})
-end
 
 -- ruby_lsp: filetypes, root, and disable semantic tokens to avoid NO_RESULT_CALLBACK_FOUND errors
 vim.lsp.config("ruby_lsp", {
@@ -181,8 +166,6 @@ require "telescope".setup({
     }
   }
 })
-
-require "telescope".load_extension("ui-select")
 
 require("actions-preview").setup {
   backend = { "telescope" },
@@ -365,32 +348,11 @@ map('n', '<leader>bb', function()
   vim.diagnostic.open_float(0, { scope = "line" })
 end, { desc = 'Check current line error' })
 
---- Rails: project root + run command in terminal (must be defined before keymaps that use them) ---
-local function rails_root()
-  local br = vim.b.rails_root
-  if br and br ~= "" then
-    return br
-  end
-  local dir = vim.fn.expand("%:p:h")
-  local tried = {}
-  for _ = 1, 30 do
-    if dir == "" or dir == "." or tried[dir] then
-      break
-    end
-    tried[dir] = true
-    if vim.fn.filereadable(dir .. "/Gemfile") == 1 then
-      return dir
-    end
-    dir = vim.fn.fnamemodify(dir, ":h")
-  end
-  return ""
-end
-
 map("n", "<leader>lf", function()
   if vim.bo.filetype == "ruby" or vim.bo.filetype == "erb" then
-    local root = rails_root()
-    if root == "" then vim.notify("Not in a Rails project", vim.log.levels.WARN); return end
-    vim.cmd("!" .. "cd " .. vim.fn.shellescape(root) .. " && bundle exec rubocop -a " .. vim.fn.expand("%:p"))
+    local gemfile = vim.fn.findfile("Gemfile", ".;")
+    local root = vim.fn.fnamemodify(gemfile, ":p:h")
+    vim.cmd("!cd " .. vim.fn.shellescape(root) .. " && bundle exec rubocop -a " .. vim.fn.expand("%:p"))
   else
     require("conform").format()
   end
@@ -416,19 +378,13 @@ map('n', '<leader>gb', builtin.git_branches, { desc = 'Git branches' })
 map('n', '<leader>gc', builtin.git_commits, { desc = 'Git commits' })
 map('n', '<leader>sd', builtin.diagnostics, { desc = 'Diagnostics' })
 
+map('n', '<leader>to', require('mini.diff').toggle_overlay, { desc = 'Toggle MiniDiff overlay' })
+
 --- Rails test keybinds (in test/spec files) ---
 local function run_test(cmd)
   vim.cmd("botright 15split | term " .. cmd)
 end
 
-vim.keymap.set("n", "<leader>tf", function()
-  run_test("dev test " .. vim.fn.expand("%:."))
-end)
-
-vim.keymap.set("n", "<leader>tl", function()
-  run_test("dev test " .. vim.fn.expand("%:.") .. ":" .. vim.fn.line("."))
-end)
-
-vim.keymap.set("n", "<leader>ts", function()
-  run_test("dev test")
-end)
+map("n", "<leader>tf", function() run_test("dev test " .. vim.fn.expand("%:.")) end)
+map("n", "<leader>tl", function() run_test("dev test " .. vim.fn.expand("%:.") .. ":" .. vim.fn.line(".")) end)
+map("n", "<leader>ts", function() run_test("dev test") end)
