@@ -59,6 +59,8 @@ vim.pack.add({
   { src = "https://github.com/hrsh7th/cmp-buffer" },
   { src = "https://github.com/hrsh7th/cmp-path" },
   { src = "https://github.com/saadparwaiz1/cmp_luasnip" },
+  { src = "https://github.com/hrsh7th/cmp-nvim-lsp-signature-help" },
+  { src = "https://github.com/onsails/lspkind.nvim" },
   { src = "https://github.com/L3MON4D3/LuaSnip" },
   { src = "https://github.com/rafamadriz/friendly-snippets" },
 
@@ -84,15 +86,14 @@ require 'mini.diff'.setup()
 require "oil".setup()
 
 --- LSP Setup ---
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
 require "mason".setup()
 require "mason-lspconfig".setup({
   automatic_installation = { exclude = { "ruby_lsp" } },
   ensure_installed = {
     "bashls", "clangd", "eslint", "lua_ls", "pyright",
     "rust_analyzer", "sqlls", "tinymist", "ts_ls",
-  },
-  handlers = {
-    function(server_name) require("lspconfig")[server_name].setup({}) end,
   },
 })
 
@@ -101,15 +102,18 @@ local lsp_servers = {
   "clangd", "ts_ls", "eslint", "ruby_lsp", "sqlls",
 }
 
--- ruby_lsp: filetypes, root, and disable semantic tokens to avoid NO_RESULT_CALLBACK_FOUND errors
+vim.lsp.config("*", {
+  capabilities = capabilities,
+})
+
 vim.lsp.config("ruby_lsp", {
   cmd = { vim.fn.expand("~/.local/bin/ruby-lsp-wrapper") },
   filetypes = { "ruby", "eruby", "erb" },
   root_markers = { "Gemfile", ".git" },
-  capabilities = {
+  capabilities = vim.tbl_deep_extend("force", capabilities, {
     textDocument = { semanticTokens = vim.NIL },
     workspace = { semanticTokens = vim.NIL },
-  },
+  }),
 })
 
 vim.lsp.enable(lsp_servers)
@@ -193,6 +197,10 @@ require("luasnip.loaders.from_lua").lazy_load({ paths = { vim.fn.stdpath("config
 
 --- Cmp setup ---
 local cmp = require("cmp")
+local lspkind = require("lspkind")
+local compare = require("cmp.config.compare")
+
+opt.completeopt = "menu,menuone,noselect"
 
 cmp.setup({
   snippet = {
@@ -202,7 +210,8 @@ cmp.setup({
   },
 
   completion = {
-    preselect = cmp.PreselectMode.None,
+    completeopt = "menu,menuone,noselect",
+    keyword_length = 1,
   },
 
   window = {
@@ -223,7 +232,7 @@ cmp.setup({
       if cmp.visible() then
         local entry = cmp.get_selected_entry()
         if entry then
-          cmp.confirm({ select = true })
+          cmp.confirm({ select = true, behavior = cmp.ConfirmBehavior.Replace })
         else
           fallback()
         end
@@ -252,23 +261,40 @@ cmp.setup({
   }),
 
   sources = cmp.config.sources({
-    { name = 'nvim_lsp' },
-    { name = 'luasnip' },
+    { name = 'nvim_lsp', max_item_count = 30 },
+    { name = 'nvim_lsp_signature_help' },
+    { name = 'luasnip', keyword_length = 2 },
     { name = 'path' },
   }, {
-    { name = 'buffer' },
+    { name = 'buffer', keyword_length = 3 },
   }),
 
+  sorting = {
+    priority_weight = 2,
+    comparators = {
+      compare.offset,
+      compare.exact,
+      compare.score,
+      compare.recently_used,
+      compare.locality,
+      compare.kind,
+      compare.length,
+      compare.order,
+    },
+  },
+
   formatting = {
-    format = function(entry, vim_item)
-      vim_item.menu = ({
+    format = lspkind.cmp_format({
+      mode = "symbol_text",
+      maxwidth = 50,
+      ellipsis_char = "...",
+      menu = {
         nvim_lsp = "[LSP]",
         luasnip = "[Snip]",
         buffer = "[Buf]",
         path = "[Path]",
-      })[entry.source.name]
-      return vim_item
-    end,
+      },
+    }),
   },
 })
 
