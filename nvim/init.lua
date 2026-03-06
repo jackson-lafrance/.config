@@ -60,9 +60,8 @@ vim.pack.add({
   { src = "https://github.com/hrsh7th/cmp-path" },
   { src = "https://github.com/saadparwaiz1/cmp_luasnip" },
   { src = "https://github.com/hrsh7th/cmp-nvim-lsp-signature-help" },
-  { src = "https://github.com/onsails/lspkind.nvim" },
   { src = "https://github.com/L3MON4D3/LuaSnip" },
-  { src = "https://github.com/rafamadriz/friendly-snippets" },
+  { src = "https://github.com/onsails/lspkind-nvim" },
 
   { src = "https://github.com/chomosuke/typst-preview.nvim" },
 
@@ -86,26 +85,24 @@ require 'mini.diff'.setup()
 require "oil".setup()
 
 --- LSP Setup ---
-local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
-require "mason".setup()
-require "mason-lspconfig".setup({
-  automatic_installation = { exclude = { "ruby_lsp" } },
-  ensure_installed = {
-    "bashls", "clangd", "eslint", "lua_ls", "pyright",
-    "rust_analyzer", "sqlls", "tinymist", "ts_ls",
-  },
-})
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 local lsp_servers = {
   "rust_analyzer", "tinymist", "bashls", "pyright", "lua_ls",
   "clangd", "ts_ls", "eslint", "ruby_lsp", "sqlls",
 }
 
-vim.lsp.config("*", {
+require "mason".setup()
+require "mason-lspconfig".setup({
+  automatic_installation = { exclude = { "ruby_lsp" } },
+  ensure_installed = vim.tbl_filter(function(s) return s ~= "ruby_lsp" end, lsp_servers),
+})
+
+vim.lsp.config('*', {
   capabilities = capabilities,
 })
 
+-- ruby_lsp: filetypes, root, and disable semantic tokens to avoid NO_RESULT_CALLBACK_FOUND errors
 vim.lsp.config("ruby_lsp", {
   cmd = { vim.fn.expand("~/.local/bin/ruby-lsp-wrapper") },
   filetypes = { "ruby", "eruby", "erb" },
@@ -190,17 +187,23 @@ require "nvim-autopairs".setup({
 
 require "nvim-ts-autotag".setup()
 
---- LuaSnip ---
+--- LuaSnip (kept for LSP snippet expansion only) ---
 local luasnip = require("luasnip")
-require("luasnip.loaders.from_vscode").lazy_load()
-require("luasnip.loaders.from_lua").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets" } })
+
+-- Clear snippet jump state when leaving insert mode so Tab doesn't teleport back
+vim.api.nvim_create_autocmd("InsertLeave", {
+  callback = function()
+    if luasnip.session.current_nodes[vim.api.nvim_get_current_buf()]
+      and not luasnip.session.jump_active then
+      luasnip.unlink_current()
+    end
+  end,
+})
 
 --- Cmp setup ---
 local cmp = require("cmp")
 local lspkind = require("lspkind")
-local compare = require("cmp.config.compare")
-
-opt.completeopt = "menu,menuone,noselect"
+local compare = cmp.config.compare
 
 cmp.setup({
   snippet = {
@@ -261,12 +264,12 @@ cmp.setup({
   }),
 
   sources = cmp.config.sources({
-    { name = 'nvim_lsp', max_item_count = 30 },
-    { name = 'nvim_lsp_signature_help' },
-    { name = 'luasnip', keyword_length = 2 },
-    { name = 'path' },
+    { name = 'nvim_lsp', priority = 1000, max_item_count = 30 },
+    { name = 'nvim_lsp_signature_help', priority = 900 },
+    { name = 'luasnip', priority = 750, keyword_length = 2 },
+    { name = 'path', priority = 500 },
   }, {
-    { name = 'buffer', keyword_length = 3 },
+    { name = 'buffer', keyword_length = 3, priority = 100, max_item_count = 5 },
   }),
 
   sorting = {
@@ -278,6 +281,7 @@ cmp.setup({
       compare.recently_used,
       compare.locality,
       compare.kind,
+      compare.sort_text,
       compare.length,
       compare.order,
     },
@@ -300,6 +304,7 @@ cmp.setup({
 
 local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+
 
 --- Typst
 require 'typst-preview'.setup()
@@ -378,7 +383,9 @@ map("n", "<leader>lf", function()
   if vim.bo.filetype == "ruby" or vim.bo.filetype == "erb" then
     local gemfile = vim.fn.findfile("Gemfile", ".;")
     local root = vim.fn.fnamemodify(gemfile, ":p:h")
+    vim.cmd("update")
     vim.cmd("!cd " .. vim.fn.shellescape(root) .. " && bundle exec rubocop -a " .. vim.fn.expand("%:p"))
+    vim.cmd("edit")
   else
     require("conform").format()
   end
