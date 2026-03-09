@@ -105,8 +105,12 @@ vim.lsp.config('*', {
 -- ruby_lsp: filetypes, root, and disable semantic tokens to avoid NO_RESULT_CALLBACK_FOUND errors
 vim.lsp.config("ruby_lsp", {
   cmd = { vim.fn.expand("~/.local/bin/ruby-lsp-wrapper") },
-  filetypes = { "ruby", "eruby", "erb" },
+  filetypes = { "ruby", "eruby" },
   root_markers = { "Gemfile", ".git" },
+  init_options = {
+    formatter = "auto",
+    pendingMigrationsCheck = false,
+  },
   capabilities = vim.tbl_deep_extend("force", capabilities, {
     textDocument = { semanticTokens = vim.NIL },
     workspace = { semanticTokens = vim.NIL },
@@ -135,6 +139,7 @@ require("conform").setup({
     c = { "clang-format" },
     cpp = { "clang-format" },
     ruby = { "rubocop" },
+    eruby = { "erb_format", "erb_lint" },
     sql = { "sql_formatter" },
   },
   default_format_opts = {
