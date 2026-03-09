@@ -199,7 +199,7 @@ local luasnip = require("luasnip")
 vim.api.nvim_create_autocmd("InsertLeave", {
   callback = function()
     if luasnip.session.current_nodes[vim.api.nvim_get_current_buf()]
-      and not luasnip.session.jump_active then
+        and not luasnip.session.jump_active then
       luasnip.unlink_current()
     end
   end,
@@ -271,10 +271,10 @@ cmp.setup({
   }),
 
   sources = cmp.config.sources({
-    { name = 'nvim_lsp', priority = 1000, max_item_count = 30 },
+    { name = 'nvim_lsp',                priority = 1000, max_item_count = 30 },
     { name = 'nvim_lsp_signature_help', priority = 900 },
-    { name = 'luasnip', priority = 750, keyword_length = 2 },
-    { name = 'path', priority = 500 },
+    { name = 'luasnip',                 priority = 750,  keyword_length = 2 },
+    { name = 'path',                    priority = 500 },
   }, {
     { name = 'buffer', keyword_length = 3, priority = 100, max_item_count = 5 },
   }),
@@ -368,6 +368,8 @@ map({ 'n', 'v', 'x' }, '<leader>r', ":restart<CR>", { desc = "Restart vim" })
 
 map('', '<leader>y', '"+y', { desc = 'Copy to clipboard' })
 map('', '<leader>d', '"+d', { desc = 'Cut to clipboard' })
+map('', '<leader>pp', '"0p', { desc = 'Paste last yanked' })
+map('', '<leader>pd', '"1p', { desc = 'Paste last deleted' })
 
 map('n', '<leader>a', 'ggVG$<cr>', { desc = 'Select all text in the file' })
 
@@ -405,8 +407,8 @@ end, { desc = "Switch tmux sessions" })
 map("n", "<leader>9", ":ToggleTerm<CR>")
 
 --- Typst Keybinds ---
-map("n", "<leader>p", ":TypstPreview<CR>")
-map("n", "<leader>tp", ":write<CR> :!typst compile '%:p' --format=pdf<CR>")
+map("n", "<leader>tp", ":TypstPreview<CR>")
+map("n", "<leader>tc", ":write<CR> :!typst compile '%:p' --format=pdf<CR>")
 map("n", "<leader>c", "1z=")
 
 --- Telescope Keybinds ---
