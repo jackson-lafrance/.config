@@ -121,6 +121,17 @@ vim.lsp.enable(lsp_servers)
 
 --- Formatter Setup ---
 require("conform").setup({
+  formatters = {
+    erb_format = {
+      command = "erb-format",
+      args = { "--stdin-filename", "$FILENAME" },
+      stdin = true,
+      env = {
+        GEM_PATH = vim.fn.expand("~/.local/share/nvim/mason/packages/erb-formatter"),
+        GEM_HOME = vim.fn.expand("~/.local/share/nvim/mason/packages/erb-formatter"),
+      },
+    },
+  },
   formatters_by_ft = {
     python = { "black" },
     javascript = { "prettier" },
@@ -139,7 +150,7 @@ require("conform").setup({
     c = { "clang-format" },
     cpp = { "clang-format" },
     ruby = { "rubocop" },
-    eruby = { "erb_format", "erb_lint" },
+    eruby = { "erb_format" },
     sql = { "sql_formatter" },
   },
   default_format_opts = {
