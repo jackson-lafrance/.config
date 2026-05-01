@@ -36,4 +36,15 @@ family = "AgaveNerdFontMono"
 style = "Italic"
 
 [keyboard]
-
+bindings = [
+	{ key = "T", mods = "Control", action = "CreateNewTab" },
+	{ key = "T", mods = "Control|Shift", action = "CreateNewWindow" },
+	{ key = "T", mods = "Control|Alt|Shift", action = "SpawnNewInstance" },
+	{ key = "C", mods = "Control", action = "Copy" },
+	{ key = "V", mods = "Control", action = "Paste" },
+	{ key = "Equals", mods = "Control|Shift", action = "IncreaseFontSize" },
+	{ key = "Minus", mods = "Control", action = "DecreaseFontSize" },
+	{ key = "W", mods = "Control", action ="Hide" },
+	{ key = "W", mods = "Control|Shift", action ="Minimize" },
+	{ key = "W", mods = "Control|Alt|Shift", action ="Quit" },
+]
