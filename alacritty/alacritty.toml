@@ -1,0 +1,39 @@
+[window]
+title = "Terminal"
+decorations = "none"
+blur = true
+opacity = 0.75
+padding.x = 10
+padding.y = 10
+
+[window.dimensions]
+columns = 160
+lines = 80
+
+[cursor.style]
+shape ="Block"
+blinking = "Never"
+
+[colors]
+#transparent_background_colors = true
+draw_bold_text_with_bright_colors = true
+
+[env]
+TERM = "xterm-256color"
+
+[font]
+glyph_offset = { x = 0, y = 0 }
+normal.family = "AgaveNerdFontMono"
+normal.style = "Regular"
+size = 12.0
+
+[font.bold]
+family = "AgaveNerdFontMono"
+style = "Bold"
+
+[font.italic]
+family = "AgaveNerdFontMono"
+style = "Italic"
+
+[keyboard]
+
