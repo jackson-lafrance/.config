@@ -1,4 +1,3 @@
-local vim = vim
 local opt = vim.opt
 vim.g.mapleader = " "
 
@@ -25,14 +24,6 @@ opt.mouse = ""
 
 opt.swapfile = false
 opt.undofile = true
-
-vim.pack.add({
-  { src = "https://github.com/rose-pine/neovim" },
-  { src = "https://github.com/nvim-tree/nvim-web-devicons" },
-
-  { src = "https://github.com/nvim-treesitter/nvim-treesitter" },
-  { src = "https://github.com/stevearc/oil.nvim" },
-})
 
 require("plugins")
 require("remap")
