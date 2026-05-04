@@ -1,8 +1,12 @@
 *
 !.gitignore
-!*/
 !nvim/
 !zsh/
 !tmux/
 !alacritty/
 !hypr/
+!nvim/**
+!zsh/**
+!tmux/**
+!alacritty/**
+!hypr/**
