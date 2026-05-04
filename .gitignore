@@ -1,9 +1,8 @@
 *
-!*/
 !.gitignore
+!*/
 !nvim/
 !zsh/
 !tmux/
 !alacritty/
 !hypr/
-!zen/
