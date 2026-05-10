@@ -5,8 +5,12 @@ import QtQuick
 import QtQuick.Layouts
 
 Rectangle {
+  id: root
   Layout.fillHeight: true
-  width: clock.implicitWidth + 30 
+  implicitWidth: clock.implicitWidth + 30
+  Layout.preferredWidth: implicitWidth
+  Layout.minimumWidth: implicitWidth
+  Layout.maximumWidth: implicitWidth
   color: Theme.surface
   border.width: 1.5
   border.color: rectangleMouse.containsMouse ? Theme.love : Theme.surface
@@ -25,21 +29,24 @@ Rectangle {
     hoverEnabled: true
   }
 
+  function formatNow() {
+    return Qt.formatDateTime(new Date(), "dd - HH:mm")
+  }
+
   Text {
     id: clock
     anchors.centerIn: parent
     font.pointSize: 12
     font.family: "AgaveNerdFontMono"
     font.bold: true
-
-    text: Qt.formatDateTime(new Date(), "dd - HH:mm")
+    text: root.formatNow()
     color: Theme.rose
 
     Timer {
       interval: 1000
       running: true
       repeat: true
-      onTriggered: clock.text = Qt.formatDateTime(new Date(), "dd - HH:mm")
+      onTriggered: clock.text = root.formatNow()
     }
   }
 }

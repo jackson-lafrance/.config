@@ -1,6 +1,5 @@
 import Quickshell
 import Quickshell.Wayland
-import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts
 
@@ -25,20 +24,17 @@ PanelWindow {
 
     Workspaces {
       Layout.fillHeight: true
+      compact: true
     }
 
     HardwareStats {
       Layout.fillHeight: true
       barWindow: root
+      compact: true
     }
 
     Item {
       Layout.fillWidth: true
-    }
-
-    VolumeWidget {
-      Layout.fillHeight: true
-      barWindow: root
     }
 
     WifiWidget {
@@ -46,14 +42,10 @@ PanelWindow {
       barWindow: root
     }
 
-    UtilityWidget {
+    VolumeWidget {
       Layout.fillHeight: true
       barWindow: root
-    }
-
-    MusicWidget {
-      Layout.fillHeight: true
-      barWindow: root
+      compact: true
     }
 
     Clock {

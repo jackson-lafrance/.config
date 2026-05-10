@@ -5,33 +5,20 @@ import QtQuick
 import QtQuick.Layouts
 
 Scope {
+  readonly property var primaryScreens: Quickshell.screens[1] ? [Quickshell.screens[1]] : []
+  readonly property var secondaryScreens: [Quickshell.screens[0], Quickshell.screens[2]].filter(function(screen) {
+    return screen !== undefined && screen !== null
+  })
+
   Variants {
-    model: [Quickshell.screens[1]]
+    model: primaryScreens
 
     Bar {}
   }
 
   Variants {
-    model: [Quickshell.screens[0], Quickshell.screens[2]]
+    model: secondaryScreens
 
-    PanelWindow {
-      property var modelData
-      screen: modelData
-      anchors.top: true
-      anchors.left: true
-      anchors.right: true
-
-      implicitHeight: 32 
-      color: "transparent"
-
-      Rectangle {
-        anchors.fill: parent
-        anchors.topMargin: Theme.margin / 2
-        anchors.leftMargin: Theme.margin
-        anchors.rightMargin: Theme.margin
-        color: Theme.surface
-        radius: 10
-      }
-    } 
+    SecondaryBar {}
   }
 }
