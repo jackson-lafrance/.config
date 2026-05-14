@@ -47,4 +47,5 @@ bindings = [
 	{ key = "W", mods = "Control", action ="Hide" },
 	{ key = "W", mods = "Control|Shift", action ="Minimize" },
 	{ key = "W", mods = "Control|Alt|Shift", action ="Quit" },
+  { key = "Return", mods = "Shift", CHARS = "\u001B\r"}
 ]

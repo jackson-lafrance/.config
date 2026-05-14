@@ -7,18 +7,19 @@ import QtQuick.Layouts
 PanelWindow {
   id: root
   property var modelData
+  readonly property int topInset: 4
   screen: modelData
   anchors.top: true
   anchors.left: true
   anchors.right: true
 
   color: "transparent"
-  implicitHeight: 32
+  implicitHeight: 22 + topInset
 
   RowLayout {
     anchors.fill: parent
-    anchors.topMargin: Theme.margin / 2
-    anchors.bottomMargin: Theme.margin / 2
+    anchors.topMargin: root.topInset
+    anchors.bottomMargin: 0
     anchors.leftMargin: Theme.margin
     anchors.rightMargin: Theme.margin
     spacing: 6
