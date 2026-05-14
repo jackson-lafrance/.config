@@ -27,3 +27,4 @@ opt.undofile = true
 
 require("plugins")
 require("remap")
+require("autocomplete")

@@ -9,13 +9,8 @@ vim.pack.add({
 
 require("mason").setup()
 
-local lspconfig = require("lspconfig")
 require("mason-lspconfig").setup({
-  handers = {
-    function(server_name)
-      lspconfig[server_name].setup({})
-    end,
-  },
+  automatic_enable = true,
 })
 
 map("n", "<leader>m", ":Mason<CR>", { desc = "Opens mason" })
