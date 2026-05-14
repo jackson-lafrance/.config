@@ -12,6 +12,10 @@
       "rev": "cb8445f8ce85d957416c106b780efd51c6298f89",
       "src": "https://github.com/mason-org/mason.nvim"
     },
+    "mini.diff": {
+      "rev": "117c301374ab8546891e2b34f63885ea83527432",
+      "src": "https://github.com/nvim-mini/mini.diff"
+    },
     "neovim": {
       "rev": "6a961effd67f6130d36df6d1c05c48c739796dd2",
       "src": "https://github.com/rose-pine/neovim"

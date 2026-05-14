@@ -2,11 +2,12 @@ local vim = vim
 local map = vim.keymap.set
 
 vim.pack.add({
-  { src = "https://github.com/rose-pine/neovim" },
-  { src = "https://github.com/nvim-tree/nvim-web-devicons" },
+  "https://github.com/rose-pine/neovim",
+  "https://github.com/nvim-tree/nvim-web-devicons",
 
-  { src = "https://github.com/nvim-treesitter/nvim-treesitter" },
-  { src = "https://github.com/stevearc/oil.nvim" },
+  "https://github.com/nvim-treesitter/nvim-treesitter",
+  "https://github.com/stevearc/oil.nvim",
+  "https://github.com/nvim-mini/mini.diff",
 })
 
 require("rose-pine").setup({
@@ -16,10 +17,14 @@ require("rose-pine").setup({
 })
 vim.cmd("colorscheme rose-pine-main")
 
+require("nvim-treesitter").setup()
+
 require("oil").setup()
 map("n", "<leader>e", ":Oil<CR>", { desc = "Open file explorer" })
 
-require("nvim-treesitter").setup()
+require 'mini.diff'.setup()
+map('n', '<leader>to', require('mini.diff').toggle_overlay, { desc = 'Toggle MiniDiff overlay' })
+
 require("plugins.lsp")
 require("plugins.telescope")
 require("plugins.pairs")

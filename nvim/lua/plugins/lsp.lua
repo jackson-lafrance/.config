@@ -2,9 +2,9 @@ local vim = vim
 local map = vim.keymap.set
 
 vim.pack.add({
-  { src = "https://github.com/mason-org/mason.nvim" },
-  { src = "https://github.com/neovim/nvim-lspconfig" },
-  { src = "https://github.com/mason-org/mason-lspconfig.nvim" },
+  "https://github.com/mason-org/mason.nvim",
+  "https://github.com/neovim/nvim-lspconfig",
+  "https://github.com/mason-org/mason-lspconfig.nvim",
 })
 
 require("mason").setup()

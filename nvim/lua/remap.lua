@@ -15,3 +15,8 @@ map('n', '<leader>so', ':so $MYVIMRC<CR>', { desc = "Shoutout Vim Config" })
 map('n', '<leader>bb', function()
   vim.diagnostic.open_float(0, { scope = "line" })
 end, { desc = 'Check current line error' })
+
+map('n', '<leader>nh', ':nohlsearch<CR>', { desc = 'Unhighlight current search' })
+
+map('n', '<leader>a', 'ggVG$<cr>', { desc = 'Select all text in the file' })
+map('n', '<leader>ie', 'gg=G<C-o>zz', { desc = 'Indent whole file' })
