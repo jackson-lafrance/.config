@@ -119,6 +119,21 @@ vim.lsp.config("ruby_lsp", {
 
 vim.lsp.enable(lsp_servers)
 
+-- Suppress ruby-lsp pending migrations popups
+local orig_show_msg = vim.lsp.handlers["window/showMessage"]
+vim.lsp.handlers["window/showMessage"] = function(err, result, ctx, config)
+  if result and result.message and result.message:lower():find("migration") then return end
+  if orig_show_msg then orig_show_msg(err, result, ctx, config) end
+end
+
+local orig_show_msg_req = vim.lsp.handlers["window/showMessageRequest"]
+vim.lsp.handlers["window/showMessageRequest"] = function(err, result, ctx, config)
+  if result and result.message and result.message:lower():find("migration") then
+    return vim.NIL  -- respond with null (no action selected) so server doesn't error
+  end
+  if orig_show_msg_req then return orig_show_msg_req(err, result, ctx, config) end
+end
+
 --- Formatter Setup ---
 require("conform").setup({
   formatters = {
@@ -386,6 +401,7 @@ map('', '<leader>pd', '"1p', { desc = 'Paste last deleted' })
 map('n', '<leader>a', 'ggVG$<cr>', { desc = 'Select all text in the file' })
 
 map('n', '<CR>', '@="m`o<C-V><Esc>``"<CR>', { desc = 'Newline below' })
+map('n', '<S-CR>', '@="m`O<C-V><Esc>``"<CR>', { desc = 'Newline above' })
 
 map('n', '<leader>e', ':Oil<CR>', { desc = 'Open file explorer' })
 

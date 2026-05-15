@@ -60,14 +60,14 @@ alias cds='cd_to_dir'
 
 # tmux session picker (fzf)
 tmx() {
-  local session
-  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --height 50% --prompt 'session> ')
-  [[ -z "$session" ]] && return
-  if [[ -n "$TMUX" ]]; then
-    tmux switch-client -t "$session"
-  else
-    tmux attach-session -t "$session"
-  fi
+    local session
+    session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --height 50% --prompt 'session> ')
+    [[ -z "$session" ]] && return
+    if [[ -n "$TMUX" ]]; then
+        tmux switch-client -t "$session"
+    else
+        tmux attach-session -t "$session"
+    fi
 }
 
 # eza aliases (better ls)
@@ -81,17 +81,17 @@ setopt prompt_subst
 git_prompt() {
     local branch=$(git symbolic-ref --short HEAD 2>/dev/null)
     [[ -z "$branch" ]] && return
-    
-    local color="green"  
-    
+
+    local color="green"
+
     if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
         color="yellow"
     fi
-    
+
     if [[ -n $(git log @{upstream}..HEAD 2>/dev/null) ]]; then
         color="cyan"
     fi
-    
+
     echo "%F{$color} $branch%f"
 }
 
@@ -111,14 +111,11 @@ source ~/.config/ollama/commands.zsh
 [[ -x /Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init ]] && eval "$(/Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init zsh)"
 
 
-# Syntax highlighting (must be last)
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
 # pnpm
 export PNPM_HOME="/Users/jacksonlafrance/Library/pnpm"
 case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
+    *":$PNPM_HOME:"*) ;;
+    *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
 
@@ -126,3 +123,12 @@ esac
 export PATH="$PATH:/Users/jacksonlafrance/.lmstudio/bin"
 # End of LM Studio CLI section
 
+export OPENAI_API_BASE="https://proxy.shopify.ai/v1"
+export OPENAI_API_KEY="shopify-eyJpZCI6ImEwZTg2NDM0OGYzODg3ZTk3ODZmNDg0MDRiOWYyYjZjIiwibW9kZSI6InBlcnNvbmFsIiwiZW1haWwiOiJqYWNrc29uLmxhZnJhbmNlQHNob3BpZnkuY29tIiwiZXhwaXJ5IjoxNzc1MjIxMjAwfQ==-oyFQ0S/muGlOzlVjY9AZyXWvBqHOtkOcffAy/d3+/W8="
+export OPENAI_MODEL="gpt-4"
+
+# Always run claude with permission prompts skipped
+alias claude='claude --dangerously-skip-permissions'
+
+# Syntax highlighting (must be last)
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
