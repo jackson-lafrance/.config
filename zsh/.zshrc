@@ -2,6 +2,8 @@
 alias vim=nvim
 alias sz='source ~/.config/zsh/.zshrc'
 
+[[ -n "$TMUX" ]] && tmux source-file ~/.config/tmux/tmux.conf
+
 tmx() {
   local session
 
@@ -28,5 +30,9 @@ setopt prompt_subst
 PROMPT='%~${vcs_info_msg_0_} %# '
 
 autoload -Uz compinit && compinit
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+setopt AUTO_MENU
+setopt COMPLETE_IN_WORD
+
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 export PATH="$HOME/.local/bin:$PATH"
