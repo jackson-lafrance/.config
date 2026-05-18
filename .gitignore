@@ -6,9 +6,11 @@
 !alacritty/
 !hypr/
 !quickshell/
+!dunst/
 !nvim/**
 !zsh/**
 !tmux/**
 !alacritty/**
 !hypr/**
 !quickshell/**
+!dunst/**
