@@ -2,11 +2,17 @@
 set -euo pipefail
 
 terminal="${TERMINAL:-alacritty}"
-browser="${BROWSER:-zen-browser}"
+main_dir="${COCKPIT_MAIN_DIR:-$HOME}"
+
+if [[ ! -d "$main_dir" ]]; then
+  main_dir="$HOME"
+fi
+
+export COCKPIT_MAIN_DIR="$main_dir"
 
 notify() {
   if command -v notify-send >/dev/null 2>&1; then
-    notify-send "JARVIS" "$1"
+    notify-send -a "JARVIS" -u low -h string:x-dunst-stack-tag:jarvis-cockpit "JARVIS" "$1"
   fi
 }
 
@@ -39,10 +45,16 @@ if run_if_exists btop; then
 fi
 
 sleep 0.6
-hyprctl dispatch exec "[workspace name:term silent] $terminal"
+hyprctl dispatch exec "[workspace name:term silent] $terminal --class main-cockpit -e $HOME/.config/hypr/scripts/cockpit-main-terminal.sh"
 
-sleep 0.8
-hyprctl dispatch exec "[workspace name:search silent] $browser"
+sleep 0.6
+
+if run_if_exists nvim; then
+  hyprctl dispatch exec "[workspace name:search silent] $terminal --class nvim-cockpit -e $HOME/.config/hypr/scripts/cockpit-oil.sh"
+fi
+
+sleep 0.5
+hyprctl dispatch exec "[workspace name:search silent] $terminal --class right-shell-cockpit -e $HOME/.config/hypr/scripts/cockpit-right-shell.sh"
 
 sleep 1.2
 notify "Cockpit online."
