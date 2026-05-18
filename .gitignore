@@ -1,0 +1,14 @@
+*
+!.gitignore
+!nvim/
+!zsh/
+!tmux/
+!alacritty/
+!hypr/
+!quickshell/
+!nvim/**
+!zsh/**
+!tmux/**
+!alacritty/**
+!hypr/**
+!quickshell/**

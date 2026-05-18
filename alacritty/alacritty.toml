@@ -5,7 +5,7 @@ TERM = "xterm-256color"
 size = 28
 
 [font.normal]
-family = "Agave Nerd Font Mono"
+family = "AgaveNerdFontMono"
 style = "Regular"
 
 [[keyboard.bindings]]
