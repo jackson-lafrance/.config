@@ -58,6 +58,21 @@ alias cdq='cd_to_dir ~/slaade'
 alias cdd='cd_to_dir ~/src/github.com/DevDegree'
 alias cds='cd_to_dir'
 
+# Path to your JUnit JAR
+export JUNIT_JAR="$HOME/lib/junit-platform-console-standalone.jar"
+
+# Alias to compile everything (including the JAR in the classpath)
+alias jcompile='javac -cp ".:$JUNIT_JAR" *.java ods/*.java'
+
+# Run a specific test class (Usage: jtest W2LabPartATests)
+jtest() {
+    java -jar "$JUNIT_JAR" --class-path . --select-class "$1"
+}
+
+# Run ALL tests in the current folder
+alias jtestall='java -jar "$JUNIT_JAR" --class-path . --scan-class-path'
+
+
 # tmux session picker (fzf)
 tmx() {
   local session
@@ -107,12 +122,7 @@ bindkey '^[[Z' autosuggest-accept  # Shift+Tab to accept
 
 source ~/.config/ollama/commands.zsh
 
-# Added by tec agent
-[[ -x /Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init ]] && eval "$(/Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init zsh)"
-
-
-# Syntax highlighting (must be last)
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+alias idf=". $HOME/.espressif/v6.0/esp-idf/export.sh"
 
 # pnpm
 export PNPM_HOME="/Users/jacksonlafrance/Library/pnpm"
@@ -126,3 +136,7 @@ esac
 export PATH="$PATH:/Users/jacksonlafrance/.lmstudio/bin"
 # End of LM Studio CLI section
 
+export GEMINI_API_KEY="AIzaSyBLTJ44YxzkK5o_6QlJa-dv7_3KysE_JMM"
+
+# Syntax highlighting (must be last)
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

@@ -117,6 +117,75 @@ vim.lsp.config("ruby_lsp", {
   }),
 })
 
+-- clangd: Mason/PATH for normal C/C++; Espressif esp-clang + query-driver only in ESP-IDF workspaces
+-- (directory has sdkconfig or sdkconfig.defaults). Add a project .clangd with
+--   CompileFlags: { Remove: [-m*, -f*] }
+-- per ESP-IDF docs to silence GCC-only flags in the compile DB.
+local function clangd_idf_root(root)
+  if not root then
+    return false
+  end
+
+  return
+      vim.uv.fs_stat(root .. "/sdkconfig") ~= nil or
+      vim.uv.fs_stat(root .. "/sdkconfig.defaults") ~= nil or
+      (vim.uv.fs_stat(root .. "/CMakeLists.txt") ~= nil and vim.uv.fs_stat(root .. "/main") ~= nil)
+end
+
+local function clangd_esp_bin()
+  return "/Users/jacksonlafrance/.espressif/tools/esp-clang/esp-20.1.1_20250829/esp-clang/bin/clangd"
+end
+
+local function clangd_default_bin()
+  local mason = vim.fn.expand("~/.local/share/nvim/mason/bin/clangd")
+  if vim.fn.executable(mason) == 1 then
+    return mason
+  end
+  return "clangd"
+end
+
+local function clangd_idf_query_driver()
+  return
+  "--query-driver=/Users/jacksonlafrance/.espressif/tools/xtensa-esp-elf/esp-15.2.0_20251204/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc"
+end
+
+local function clangd_argv(root)
+  local argv = { clangd_default_bin(), "--background-index" }
+
+  if clangd_idf_root(root) then
+    local esp = clangd_esp_bin()
+    if esp then
+      argv[1] = esp
+    end
+
+    argv[#argv + 1] = "--compile-commands-dir=build"
+
+    local qd = clangd_idf_query_driver()
+    if qd then
+      argv[#argv + 1] = qd
+    end
+  end
+
+  vim.schedule(function()
+    print(vim.inspect(argv))
+  end)
+
+  return argv
+end
+
+vim.lsp.config("clangd", {
+  cmd = function(dispatchers, config)
+    if config.root_dir then
+      config.cmd_cwd = config.root_dir
+    end
+    return vim.lsp.rpc.start(clangd_argv(config.root_dir), dispatchers, {
+      cwd = config.cmd_cwd,
+      env = config.cmd_env,
+      detached = config.detached,
+    })
+  end,
+})
+
 vim.lsp.enable(lsp_servers)
 
 --- Formatter Setup ---
