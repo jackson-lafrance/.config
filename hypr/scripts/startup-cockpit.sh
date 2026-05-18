@@ -2,17 +2,11 @@
 set -euo pipefail
 
 terminal="${TERMINAL:-alacritty}"
-main_dir="${COCKPIT_MAIN_DIR:-$HOME}"
-
-if [[ ! -d "$main_dir" ]]; then
-  main_dir="$HOME"
-fi
-
-export COCKPIT_MAIN_DIR="$main_dir"
+browser="${BROWSER:-zen-browser}"
 
 notify() {
   if command -v notify-send >/dev/null 2>&1; then
-    notify-send -a "JARVIS" -u low -h string:x-dunst-stack-tag:jarvis-cockpit "JARVIS" "$1"
+    notify-send -a "SLAADE" -u low -h string:x-dunst-stack-tag:slaade-cockpit "SLAADE" "$1"
   fi
 }
 
@@ -30,31 +24,61 @@ sleep 0.7
 notify "Initializing Rosé Pine development cockpit..."
 
 # Put the dashboard workspace on-screen first, then reveal each piece in order.
-hyprctl dispatch workspace name:jarvis >/dev/null 2>&1 || true
+hyprctl dispatch workspace name:SLAADE >/dev/null 2>&1 || true
 
 sleep 0.6
 
 if run_if_exists fastfetch; then
-  hyprctl dispatch exec "[workspace name:jarvis silent] $terminal --class fastfetch-cockpit -e bash -lc 'fastfetch; echo; echo \"system ready.\"; sleep 12'"
+  hyprctl dispatch exec "[workspace name:SLAADE silent] $terminal --class fastfetch-cockpit -e bash -lc 'fastfetch; echo; echo \"system ready.\"; exec \"${SHELL:-/bin/bash}\" -l'"
+else
+  notify "fastfetch not found; skipping system overview."
 fi
 
 sleep 0.5
 
 if run_if_exists btop; then
-  hyprctl dispatch exec "[workspace name:jarvis silent] $terminal --class btop-cockpit -e btop"
+  hyprctl dispatch exec "[workspace name:SLAADE silent] $terminal --class btop-cockpit -e btop"
+else
+  notify "btop not found; skipping resource monitor."
 fi
 
 sleep 0.6
-hyprctl dispatch exec "[workspace name:term silent] $terminal --class main-cockpit -e $HOME/.config/hypr/scripts/cockpit-main-terminal.sh"
+
+if run_if_exists tmux; then
+  hyprctl dispatch exec "[workspace name:term silent] $terminal --class tmux-cockpit -e zsh -lc 'tmux new-session -A -s dev -c \"$HOME\"; exec zsh -l'"
+else
+  notify "tmux not found; opening a plain terminal."
+  hyprctl dispatch exec "[workspace name:term silent] $terminal"
+fi
 
 sleep 0.6
-
-if run_if_exists nvim; then
-  hyprctl dispatch exec "[workspace name:search silent] $terminal --class nvim-cockpit -e $HOME/.config/hypr/scripts/cockpit-oil.sh"
+if run_if_exists "$browser"; then
+  hyprctl dispatch exec "[workspace name:search silent] $browser --new-window https://login.tailscale.com/admin/machines"
+else
+  notify "$browser not found; skipping Tailscale admin window."
 fi
 
 sleep 0.5
-hyprctl dispatch exec "[workspace name:search silent] $terminal --class right-shell-cockpit -e $HOME/.config/hypr/scripts/cockpit-right-shell.sh"
+
+if run_if_exists watch; then
+  status_command="date +%T"
+
+  if run_if_exists tailscale; then
+    status_command="tailscale status"
+  else
+    notify "tailscale not found; status monitor will show the clock only."
+  fi
+
+  if run_if_exists sensors; then
+    status_command="$status_command; echo; sensors"
+  else
+    notify "sensors not found; skipping temperature readout."
+  fi
+
+  hyprctl dispatch exec "[workspace name:search silent] $terminal --class tailscale-status-cockpit -e watch -c -n 2 '$status_command'"
+else
+  notify "watch not found; skipping status monitor."
+fi
 
 sleep 1.2
 notify "Cockpit online."

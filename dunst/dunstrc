@@ -62,8 +62,8 @@
     frame_color = "#eb6f92"
     timeout = 0
 
-[jarvis-cockpit]
-    appname = "JARVIS"
+[slaade]
+    appname = "SLAADE"
     background = "#191724"
     foreground = "#e0def4"
     frame_color = "#ebbcba"

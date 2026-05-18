@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-main_dir="${COCKPIT_MAIN_DIR:-$HOME}"
+# Keep Oil anchored to your home directory, regardless of any future cockpit
+# directory changes.
+oil_dir="$HOME"
 
-if [[ ! -d "$main_dir" ]]; then
-  main_dir="$HOME"
-fi
-
-cd "$main_dir"
-exec nvim "$main_dir" -c "Oil"
+cd "$oil_dir"
+exec nvim "$oil_dir" -c "Oil"

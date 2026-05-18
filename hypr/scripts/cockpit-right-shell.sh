@@ -20,7 +20,7 @@ iris='\033[38;2;196;167;231m'
 gold='\033[38;2;246;193;119m'
 reset='\033[0m'
 
-printf "${pine}╭─${rose} JARVIS AUX SHELL ${pine}────────────────────────╮${reset}\n"
+printf "${pine}╭─${rose} SLAADE AUX SHELL ${pine}────────────────────────╮${reset}\n"
 printf "${pine}│${reset} ${text}right monitor command console${reset}                    ${pine}│${reset}\n"
 printf "${pine}╰──────────────────────────────────────────────╯${reset}\n\n"
 
