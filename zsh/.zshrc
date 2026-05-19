@@ -1,13 +1,11 @@
 # ln -s ~/.config/zsh/.zshrc ~/.zshrc remember this command when pulling repo
 
-# Homebrew and user binaries first so macOS shells find brewed tools and npm globals.
 export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 if command -v npm >/dev/null 2>&1; then
   export PATH="$(npm prefix -g)/bin:$PATH"
 fi
 
-# History
 HISTSIZE=10000
 SAVEHIST=10000
 HISTFILE=~/.zsh_history
@@ -15,46 +13,23 @@ setopt SHARE_HISTORY
 setopt HIST_IGNORE_DUPS
 setopt HIST_IGNORE_SPACE
 
-# Completion
 autoload -Uz compinit && compinit
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 setopt AUTO_MENU
 setopt COMPLETE_IN_WORD
 
-# Git / project aliases
-alias ga="git add"
-alias gr="git restore"
-alias gp="git push"
-alias gc="git commit"
-alias gs="git status"
-alias gd="git diff"
-alias gl="git pull"
-alias g="git"
-alias gco="git checkout"
-alias gb="git branch"
-alias gcm="git commit -m"
-alias nrd="npm run dev"
-alias nrs="npm run start"
-alias nrc="npm run compile"
-
 alias vim="nvim"
 alias sz='source ~/.config/zsh/.zshrc'
 alias python3='/opt/homebrew/bin/python3'
 
-# nvm from Homebrew, if installed.
 export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"
 [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && . "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
 
-# DevDegree helper, if present.
-[ -f /opt/dev/dev.sh ] && source /opt/dev/dev.sh
-
-# fzf shell integration, if installed.
 if command -v fzf >/dev/null 2>&1; then
   source <(fzf --zsh)
 fi
 
-# Reload tmux config inside tmux sessions.
 [[ -n "$TMUX" ]] && tmux source-file ~/.config/tmux/tmux.conf
 
 cd_to_dir() {
@@ -70,7 +45,6 @@ alias cdq='cd_to_dir ~/slaade'
 alias cdd='cd_to_dir ~/src/github.com/DevDegree'
 alias cds='cd_to_dir'
 
-# Java/JUnit helpers.
 export JUNIT_JAR="$HOME/lib/junit-platform-console-standalone.jar"
 alias jcompile='javac -cp ".:$JUNIT_JAR" *.java ods/*.java'
 jtest() {
@@ -78,7 +52,6 @@ jtest() {
 }
 alias jtestall='java -jar "$JUNIT_JAR" --class-path . --scan-class-path'
 
-# tmux session picker.
 tmx() {
   local session
 
@@ -92,7 +65,6 @@ tmx() {
   fi
 }
 
-# eza aliases.
 alias ls='eza --icons'
 alias ll='eza -la --icons --git'
 alias la='eza -a --icons'
@@ -116,12 +88,11 @@ git_prompt() {
     color="cyan"
   fi
 
-  echo "%F{$color} $branch%f"
+  echo " %F{$color}[$branch]%f"
 }
 
-PROMPT='%F{blue}%~%f$(git_prompt) %F{magenta}❯%f '
+PROMPT='%F{blue}%~%f$(git_prompt) %F{magenta}%#%f '
 
-# Autosuggestions.
 if [ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
   ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=245'
   ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=0
@@ -133,18 +104,12 @@ fi
 
 alias idf=". $HOME/.espressif/v6.0/esp-idf/export.sh"
 
-# pnpm
 export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
-# pnpm end
 
-# LM Studio CLI.
-export PATH="$PATH:$HOME/.lmstudio/bin"
-
-# Syntax highlighting should be loaded near the end.
 if [ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
   source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
