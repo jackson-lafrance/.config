@@ -4,7 +4,16 @@
 !zsh/
 !tmux/
 !alacritty/
+!hypr/
+!quickshell/
+!dunst/
 !nvim/**
 !zsh/**
 !tmux/**
 !alacritty/**
+!hypr/**
+!quickshell/**
+!dunst/**
+
+# Machine-local editor/agent state.
+nvim/.claude/
