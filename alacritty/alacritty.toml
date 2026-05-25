@@ -1,12 +1,42 @@
+[window]
+title = "Terminal"
+blur = true
+opacity = 0.75
+dynamic_padding = true
+option_as_alt = "Both"
+
+[window.padding]
+x = 0
+y = 0
+
+[window.dimensions]
+columns = 160
+lines = 80
+
+[cursor.style]
+shape = "Block"
+blinking = "Never"
+
+[colors]
+# transparent_background_colors = true
+draw_bold_text_with_bright_colors = true
+
 [env]
 TERM = "xterm-256color"
 
 [font]
-size = 28
+glyph_offset = { x = 0, y = 0 }
+normal.family = "Agave Nerd Font Mono"
+normal.style = "Regular"
+size = 12.0
 
-[font.normal]
+[font.bold]
 family = "Agave Nerd Font Mono"
-style = "Regular"
+style = "Bold"
+
+[font.italic]
+family = "Agave Nerd Font Mono"
+style = "Italic"
 
 [[keyboard.bindings]]
 action = "ResetFontSize"
@@ -95,14 +125,10 @@ action = "ToggleFullscreen"
 key = "F"
 mods = "Command|Shift"
 
-[window]
-opacity = 1.0
-dynamic_padding = true
-option_as_alt = "Both"
-
-[window.padding]
-x = 0
-y = 0
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001b[13;2u"
 
 # Rose Pine Theme
 [colors.primary]
@@ -140,8 +166,3 @@ blue = "0x9ccfd8"
 magenta = "0xc4a7e7"
 cyan = "0xebbcba"
 white = "0xe0def4"
-
-[[keyboard.bindings]]
-key = "Return"
-mods = "Shift"
-chars = "\u001b[13;2u"

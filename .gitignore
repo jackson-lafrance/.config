@@ -1,0 +1,15 @@
+*
+!.gitignore
+!nvim/
+!zsh/
+!tmux/
+!alacritty/
+!nvim/**
+!zsh/**
+!tmux/**
+!alacritty/**
+
+# Machine-local editor/agent state and secrets.
+nvim/.claude/
+zsh/*.local.zsh
+zsh/.*.local.zsh
