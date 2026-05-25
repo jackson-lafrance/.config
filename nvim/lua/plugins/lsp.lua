@@ -7,14 +7,13 @@ vim.pack.add({
   "https://github.com/mason-org/mason-lspconfig.nvim",
 })
 
-require("mason").setup()
+require("mason").setup({
+  PATH = "append",
+})
 
 require("mason-lspconfig").setup({
   automatic_enable = {
-    -- Ruby LSP should run from the active Ruby environment instead of Mason.
-    -- On Shopify machines this avoids package-manager lockdown issues around
-    -- npm-backed Mason packages while still leaving Mason useful for other LSPs.
-    exclude = { "ruby_lsp", "shopify_theme_ls" },
+    exclude = { "ruby_lsp" },
   },
 })
 
