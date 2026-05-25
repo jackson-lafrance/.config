@@ -76,8 +76,30 @@ end
 
 vim.lsp.config("ruby_lsp", {
   cmd = ruby_lsp_cmd(),
+  filetypes = { "ruby", "eruby" },
+  root_markers = { "Gemfile", ".git" },
+  init_options = {
+    formatter = "auto",
+  },
 })
 vim.lsp.enable("ruby_lsp")
+
+vim.api.nvim_create_user_command("RubyLspInfo", function()
+  local config = vim.lsp.config.ruby_lsp or {}
+  local clients = vim.lsp.get_clients({ name = "ruby_lsp", bufnr = 0 })
+  local lines = {
+    "ruby_lsp configured cmd: " .. table.concat(config.cmd or {}, " "),
+    "current filetype: " .. vim.bo.filetype,
+    "attached ruby_lsp clients: " .. #clients,
+  }
+
+  for _, client in ipairs(clients) do
+    table.insert(lines, "client " .. client.id .. " cmd: " .. table.concat(client.config.cmd or {}, " "))
+    table.insert(lines, "client " .. client.id .. " root: " .. (client.config.root_dir or "none"))
+  end
+
+  vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO)
+end, { desc = "Show Ruby LSP command and attachment state" })
 
 map("n", "<leader>m", ":Mason<CR>", { desc = "Opens mason" })
 map("n", "<leader>lf", function()
