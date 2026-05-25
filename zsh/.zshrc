@@ -64,8 +64,7 @@ alias prs='pnpm run start'
 alias prc='pnpm run compile'
 
 # Ruby LSP is intentionally provided by the active Ruby/dev environment, not Mason.
-# Override this in zsh/.shopify.local.zsh if a repo needs a different command.
-export RUBY_LSP_CMD="${RUBY_LSP_CMD:-ruby-lsp}"
+# Set RUBY_LSP_CMD in zsh/.shopify.local.zsh only if a repo needs a custom command.
 
 [[ -n "$TMUX" ]] && tmux source-file ~/.config/tmux/tmux.conf
 
