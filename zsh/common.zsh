@@ -14,6 +14,9 @@ fi
 
 path_prepend "$HOME/.local/bin"
 
+export PNPM_HOME="$HOME/Library/pnpm"
+path_prepend "$PNPM_HOME"
+
 alias vim='nvim'
 alias claude='claude --dangerously-skip-permissions'
 
