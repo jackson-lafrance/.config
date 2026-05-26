@@ -4,6 +4,10 @@
       "rev": "0ac9c2aa3cfc8c885321c0862b50b6b1c3392405",
       "src": "https://github.com/aznhe21/actions-preview.nvim"
     },
+    "conform.nvim": {
+      "rev": "c2526f1cde528a66e086ab1668e996d162c75f4f",
+      "src": "https://github.com/stevearc/conform.nvim"
+    },
     "mason-lspconfig.nvim": {
       "rev": "0c2823e0418f3d9230ff8b201c976e84de1cb401",
       "src": "https://github.com/mason-org/mason-lspconfig.nvim"

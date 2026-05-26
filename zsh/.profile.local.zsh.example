@@ -1,0 +1,7 @@
+# Copy this file to zsh/.profile.local.zsh on each machine.
+# zsh/.profile.local.zsh is ignored by git so machine-local choices and secrets stay private.
+
+# Pick exactly one:
+export DOTFILES_PROFILE=personal
+# export DOTFILES_PROFILE=shopify
+# export DOTFILES_PROFILE=arch
