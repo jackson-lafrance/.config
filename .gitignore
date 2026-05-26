@@ -15,5 +15,14 @@
 !quickshell/**
 !dunst/**
 
-# Machine-local editor/agent state.
+# Machine-local editor/agent state and secrets.
+.ruby-lsp/
+.DS_Store
+configstore/
+gh/
 nvim/.claude/
+nvim/.ruby-lsp/
+zsh/*.local.zsh
+zsh/.*.local.zsh
+tmux/*.local.conf
+alacritty/*.local.toml

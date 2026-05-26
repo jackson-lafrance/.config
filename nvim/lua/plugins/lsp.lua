@@ -8,42 +8,6 @@ vim.pack.add({
 })
 
 require("mason").setup()
-
-require("mason-lspconfig").setup({
-  automatic_enable = {
-    -- Ruby LSP should run from the active Ruby environment instead of Mason.
-    -- On Shopify machines this avoids package-manager lockdown issues around
-    -- npm-backed Mason packages while still leaving Mason useful for other LSPs.
-    exclude = { "ruby_lsp", "shopify_theme_ls" },
-  },
-})
-
-local function split_command(command)
-  return vim.split(command, "%s+", { trimempty = true })
-end
-
-local function ruby_lsp_cmd()
-  if vim.env.RUBY_LSP_CMD and vim.env.RUBY_LSP_CMD ~= "" then
-    return split_command(vim.env.RUBY_LSP_CMD)
-  end
-
-  if vim.fn.executable("ruby-lsp") == 1 then
-    return { "ruby-lsp" }
-  end
-
-  if vim.fn.executable("bundle") == 1 then
-    return { "bundle", "exec", "ruby-lsp" }
-  end
-
-  return { "ruby-lsp" }
-end
-
-vim.lsp.config("ruby_lsp", {
-  cmd = ruby_lsp_cmd(),
-})
-vim.lsp.enable("ruby_lsp")
+require("mason-lspconfig").setup()
 
 map("n", "<leader>m", ":Mason<CR>", { desc = "Opens mason" })
-map("n", "<leader>lf", function()
-  vim.lsp.buf.format()
-end, { desc = "Formats the current buffer" })

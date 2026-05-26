@@ -1,38 +1,41 @@
 # ln -s ~/.config/zsh/.zshrc ~/.zshrc remember this command when pulling repo
-alias vim=nvim
-alias sz='source ~/.config/zsh/.zshrc'
 
-[[ -n "$TMUX" ]] && tmux source-file ~/.config/tmux/tmux.conf
+export ZSH_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
+export DOTFILES_PROFILE_FILE="$ZSH_CONFIG_DIR/.profile.local.zsh"
 
-tmx() {
-  local session
+if [[ -f "$ZSH_CONFIG_DIR/common.zsh" ]]; then
+  source "$ZSH_CONFIG_DIR/common.zsh"
+else
+  print -u2 "dotfiles: missing shared zsh config: $ZSH_CONFIG_DIR/common.zsh"
+fi
 
-  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --height 50% --prompt 'session> ')
-  [[ -z "$session" ]] && return
-  if [[ -n "$TMUX" ]]; then
-    tmux switch-client -t "$session"
-  else
-    tmux attach-session -t "$session"
-  fi
-}
+if [[ -f "$DOTFILES_PROFILE_FILE" ]]; then
+  source "$DOTFILES_PROFILE_FILE"
+else
+  print -u2 "dotfiles: missing $DOTFILES_PROFILE_FILE"
+  print -u2 "dotfiles: copy $ZSH_CONFIG_DIR/.profile.local.zsh.example to $DOTFILES_PROFILE_FILE"
+  print -u2 "dotfiles: then set: export DOTFILES_PROFILE=personal|shopify|arch"
+fi
 
-alias ls="eza"
-alias ll="eza -l"
-alias la="eza -la"
-alias lt="eza --tree"
-alias gls="eza --git-ignore --icons --group-directories-first"
+case "${DOTFILES_PROFILE:-}" in
+  personal|arch)
+    ;;
+  shopify)
+    if [[ -f "$ZSH_CONFIG_DIR/profiles/shopify.zsh" ]]; then
+      source "$ZSH_CONFIG_DIR/profiles/shopify.zsh"
+    else
+      print -u2 "dotfiles: missing Shopify profile: $ZSH_CONFIG_DIR/profiles/shopify.zsh"
+    fi
+    ;;
+  "")
+    print -u2 "dotfiles: DOTFILES_PROFILE is not set; expected personal, shopify, or arch"
+    ;;
+  *)
+    print -u2 "dotfiles: unknown DOTFILES_PROFILE='$DOTFILES_PROFILE'; expected personal, shopify, or arch"
+    ;;
+esac
 
-autoload -Uz vcs_info
-precmd() { vcs_info }
-zstyle ':vcs_info:git:*' formats ' [%b]'
-
-setopt prompt_subst
-PROMPT='%~${vcs_info_msg_0_} %# '
-
-autoload -Uz compinit && compinit
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
-setopt AUTO_MENU
-setopt COMPLETE_IN_WORD
-
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-export PATH="$HOME/.local/bin:$PATH"
+# Syntax highlighting should be loaded after aliases, widgets, and profile setup.
+if typeset -f _dotfiles_source_syntax_highlighting >/dev/null 2>&1; then
+  _dotfiles_source_syntax_highlighting
+fi

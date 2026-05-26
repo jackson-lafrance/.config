@@ -1,51 +1,118 @@
 [window]
 title = "Terminal"
-decorations = "none"
 blur = true
 opacity = 0.75
-padding.x = 10
-padding.y = 10
+dynamic_padding = true
+option_as_alt = "Both"
+
+[window.padding]
+x = 0
+y = 0
 
 [window.dimensions]
 columns = 160
 lines = 80
 
 [cursor.style]
-shape ="Block"
+shape = "Block"
 blinking = "Never"
 
 [colors]
-#transparent_background_colors = true
 draw_bold_text_with_bright_colors = true
 
 [env]
 TERM = "xterm-256color"
 
 [font]
-glyph_offset = { x = 0, y = 0 }
-normal.family = "Agave Nerd Font Mono"
-normal.style = "Regular"
 size = 12.0
+glyph_offset = { x = 0, y = 0 }
+
+[font.normal]
+family = "AgaveNerdFontMono"
+style = "Regular"
 
 [font.bold]
-family = "Agave Nerd Font Mono"
+family = "AgaveNerdFontMono"
 style = "Bold"
 
 [font.italic]
-family = "Agave Nerd Font Mono"
-style = "Italic"
+family = "AgaveNerdFontMono"
+style = "Regular"
+
+[font.bold_italic]
+family = "AgaveNerdFontMono"
+style = "Bold"
 
 [keyboard]
 bindings = [
-	{ key = "T", mods = "Control", action = "CreateNewTab" },
-	{ key = "T", mods = "Control|Shift", action = "CreateNewWindow" },
-	{ key = "T", mods = "Control|Alt|Shift", action = "SpawnNewInstance" },
+  # macOS-style bindings.
+  { key = "Key0", mods = "Command", action = "ResetFontSize" },
+  { key = "Equals", mods = "Command", action = "IncreaseFontSize" },
+  { key = "Plus", mods = "Command", action = "IncreaseFontSize" },
+  { key = "NumpadAdd", mods = "Command", action = "IncreaseFontSize" },
+  { key = "Minus", mods = "Command", action = "DecreaseFontSize" },
+  { key = "NumpadSubtract", mods = "Command", action = "DecreaseFontSize" },
+  { key = "C", mods = "Command", action = "Copy" },
+  { key = "V", mods = "Command", action = "Paste" },
+  { key = "H", mods = "Command", action = "Hide" },
+  { key = "Q", mods = "Command", action = "Quit" },
+  { key = "W", mods = "Command", action = "Quit" },
+  { key = "N", mods = "Command", action = "SpawnNewInstance" },
+  { key = "T", mods = "Command", action = "SpawnNewInstance" },
+  { key = "F", mods = "Command|Control", action = "None" },
+  { key = "F", mods = "Command", mode = "~Search", action = "None" },
+  { key = "A", mods = "Command", action = "None" },
+  { key = "B", mods = "Command", mode = "~Search", action = "None" },
+  { key = "F", mods = "Command|Shift", action = "ToggleFullscreen" },
+
+  # Linux-style bindings from the Arch config.
+  { key = "T", mods = "Control", action = "CreateNewTab" },
+  { key = "T", mods = "Control|Shift", action = "CreateNewWindow" },
+  { key = "T", mods = "Control|Alt|Shift", action = "SpawnNewInstance" },
   { key = "C", mods = "Control|Shift", action = "Copy" },
   { key = "V", mods = "Control|Shift", action = "Paste" },
-	{ key = "Equals", mods = "Control|Shift", action = "IncreaseFontSize" },
-	{ key = "Minus", mods = "Control", action = "DecreaseFontSize" },
-	{ key = "W", mods = "Control", action ="Hide" },
-	{ key = "W", mods = "Control|Shift", action ="Minimize" },
-	{ key = "W", mods = "Control|Alt|Shift", action ="Quit" },
-  { key = "Return", mods = "Shift", CHARS = "\u001B\r"}
+  { key = "Equals", mods = "Control|Shift", action = "IncreaseFontSize" },
+  { key = "Minus", mods = "Control", action = "DecreaseFontSize" },
+  { key = "W", mods = "Control", action = "Hide" },
+  { key = "W", mods = "Control|Shift", action = "Minimize" },
+  { key = "W", mods = "Control|Alt|Shift", action = "Quit" },
+
+  # Send a CSI-u Shift-Return sequence for terminal apps that distinguish it.
+  { key = "Return", mods = "Shift", chars = "\u001b[13;2u" },
 ]
+
+[colors.primary]
+background = "0x191724"
+foreground = "0xe0def4"
+
+[colors.cursor]
+text = "0x191724"
+cursor = "0xe0def4"
+
+[colors.vi_mode_cursor]
+text = "0x191724"
+cursor = "0x31748f"
+
+[colors.selection]
+text = "0x191724"
+background = "0x403d52"
+
+[colors.normal]
+black = "0x191724"
+red = "0xeb6f92"
+green = "0x31748f"
+yellow = "0xf6c177"
+blue = "0x9ccfd8"
+magenta = "0xc4a7e7"
+cyan = "0xebbcba"
+white = "0xe0def4"
+
+[colors.bright]
+black = "0x26233a"
+red = "0xeb6f92"
+green = "0x31748f"
+yellow = "0xf6c177"
+blue = "0x9ccfd8"
+magenta = "0xc4a7e7"
+cyan = "0xebbcba"
+white = "0xe0def4"
