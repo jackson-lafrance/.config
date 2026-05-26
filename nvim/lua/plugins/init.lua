@@ -8,6 +8,7 @@ vim.pack.add({
   "https://github.com/nvim-treesitter/nvim-treesitter",
   "https://github.com/stevearc/oil.nvim",
   "https://github.com/nvim-mini/mini.diff",
+  "https://github.com/stevearc/conform.nvim",
 })
 
 require("rose-pine").setup({
@@ -26,5 +27,6 @@ require 'mini.diff'.setup()
 map('n', '<leader>to', require('mini.diff').toggle_overlay, { desc = 'Toggle MiniDiff overlay' })
 
 require("plugins.lsp")
+require("plugins.conform")
 require("plugins.telescope")
 require("plugins.pairs")

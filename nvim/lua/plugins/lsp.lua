@@ -12,6 +12,9 @@ require("mason").setup({
 })
 
 require("mason-lspconfig").setup({
+  ensure_installed = {
+    "ts_ls",
+  },
   automatic_enable = {
     exclude = { "ruby_lsp" },
   },
@@ -43,6 +46,3 @@ vim.lsp.config("ruby_lsp", {
 vim.lsp.enable("ruby_lsp")
 
 map("n", "<leader>m", ":Mason<CR>", { desc = "Opens mason" })
-map("n", "<leader>lf", function()
-  vim.lsp.buf.format()
-end, { desc = "Formats the current buffer" })
