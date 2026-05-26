@@ -50,8 +50,6 @@ if command -v eza >/dev/null 2>&1; then
   alias gls='eza --git-ignore --icons --group-directories-first'
 fi
 
-autoload -Uz vcs_info
-
 # Rosé Pine prompt palette, using zsh prompt escapes so the colors stay
 # local to the prompt and reset cleanly after each segment.
 RP_RESET='%f'
@@ -64,22 +62,45 @@ RP_IRIS='%F{#c4a7e7}'
 RP_MUTED='%F{#6e6a86}'
 
 precmd() {
-  local git_status
+  local branch upstream branch_color
+  local ahead behind
 
-  vcs_info
-  _prompt_git_status=''
+  _prompt_git_info=''
 
-  [[ -n "$vcs_info_msg_0_" ]] || return
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || return
 
-  git_status=$(git status --porcelain --ignore-submodules=dirty 2>/dev/null | tail -n 1)
-  [[ -n "$git_status" ]] && _prompt_git_status=" ${RP_GOLD}%1{✗%}${RP_RESET}"
+  branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null)
+  [[ -n "$branch" ]] || branch=$(git rev-parse --short HEAD 2>/dev/null)
+  [[ -n "$branch" ]] || return
+
+  branch_color="$RP_ROSE"
+
+  if ! git diff --quiet --ignore-submodules -- 2>/dev/null \
+    || ! git diff --cached --quiet --ignore-submodules -- 2>/dev/null \
+    || [[ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]]; then
+    branch_color="$RP_GOLD"
+  else
+    upstream=$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null)
+
+    if [[ -n "$upstream" ]]; then
+      ahead=$(git rev-list --count "${upstream}..HEAD" 2>/dev/null)
+      behind=$(git rev-list --count "HEAD..${upstream}" 2>/dev/null)
+
+      if (( ${ahead:-0} > 0 )); then
+        branch_color="$RP_LOVE"
+      elif (( ${behind:-0} > 0 )); then
+        branch_color="$RP_IRIS"
+      else
+        branch_color="$RP_PINE"
+      fi
+    fi
+  fi
+
+  _prompt_git_info=" ${RP_MUTED}[${branch_color}${branch}${RP_MUTED}]${RP_RESET}"
 }
 
-zstyle ':vcs_info:git:*' formats " ${RP_IRIS}[${RP_ROSE}%b${RP_IRIS}]${RP_RESET}"
-zstyle ':vcs_info:git:*' actionformats " ${RP_IRIS}[${RP_ROSE}%b${RP_MUTED}|${RP_GOLD}%a${RP_IRIS}]${RP_RESET}"
-
 setopt prompt_subst
-PROMPT='${RP_FOAM}%~${RP_RESET}${vcs_info_msg_0_}${_prompt_git_status} %(?:${RP_PINE}%#:${RP_LOVE}%#)${RP_RESET} '
+PROMPT='${RP_FOAM}%~${RP_RESET}${_prompt_git_info} ${RP_MUTED}%#${RP_RESET} '
 
 autoload -Uz compinit && compinit
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
