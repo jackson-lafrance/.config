@@ -51,11 +51,35 @@ if command -v eza >/dev/null 2>&1; then
 fi
 
 autoload -Uz vcs_info
-precmd() { vcs_info }
-zstyle ':vcs_info:git:*' formats ' [%b]'
+
+# Rosé Pine prompt palette, using zsh prompt escapes so the colors stay
+# local to the prompt and reset cleanly after each segment.
+RP_RESET='%f'
+RP_LOVE='%F{#eb6f92}'
+RP_GOLD='%F{#f6c177}'
+RP_ROSE='%F{#ebbcba}'
+RP_PINE='%F{#31748f}'
+RP_FOAM='%F{#9ccfd8}'
+RP_IRIS='%F{#c4a7e7}'
+RP_MUTED='%F{#6e6a86}'
+
+precmd() {
+  local git_status
+
+  vcs_info
+  _prompt_git_status=''
+
+  [[ -n "$vcs_info_msg_0_" ]] || return
+
+  git_status=$(git status --porcelain --ignore-submodules=dirty 2>/dev/null | tail -n 1)
+  [[ -n "$git_status" ]] && _prompt_git_status=" ${RP_GOLD}%1{✗%}${RP_RESET}"
+}
+
+zstyle ':vcs_info:git:*' formats " ${RP_IRIS}[${RP_ROSE}%b${RP_IRIS}]${RP_RESET}"
+zstyle ':vcs_info:git:*' actionformats " ${RP_IRIS}[${RP_ROSE}%b${RP_MUTED}|${RP_GOLD}%a${RP_IRIS}]${RP_RESET}"
 
 setopt prompt_subst
-PROMPT='%~${vcs_info_msg_0_} %# '
+PROMPT='${RP_FOAM}%~${RP_RESET}${vcs_info_msg_0_}${_prompt_git_status} %(?:${RP_PINE}%#:${RP_LOVE}%#)${RP_RESET} '
 
 autoload -Uz compinit && compinit
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
