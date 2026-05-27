@@ -21,6 +21,14 @@ die() {
   exit 1
 }
 
+clear_screen() {
+  if [[ -t 2 ]]; then
+    printf '\033[2J\033[H' >&2
+  elif [[ -t 1 ]]; then
+    printf '\033[2J\033[H'
+  fi
+}
+
 get_tmux_option() {
   local option="$1"
   local default_value="$2"
@@ -106,6 +114,136 @@ existing_worktree_for_branch() {
     '
 }
 
+option_enabled() {
+  local option="$1"
+  local default_value="$2"
+  local value
+
+  value="$(get_tmux_option "$option" "$default_value" | LC_ALL=C tr '[:upper:]' '[:lower:]')"
+
+  case "$value" in
+    1 | on | true | yes | enabled) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+fetch_remote() {
+  local repo="$1"
+  local remote="$2"
+
+  if ! option_enabled "@gwt-auto-fetch" "on"; then
+    return 0
+  fi
+
+  clear_screen
+  printf 'Fetching %s...\n' "$remote" >&2
+
+  if option_enabled "@gwt-fetch-prune" "on"; then
+    if ! git -C "$repo" fetch --prune "$remote" >/dev/null 2>&1; then
+      display_message "git fetch --prune $remote failed; branch picker closed"
+      exit 1
+    fi
+  else
+    if ! git -C "$repo" fetch "$remote" >/dev/null 2>&1; then
+      display_message "git fetch $remote failed; branch picker closed"
+      exit 1
+    fi
+  fi
+
+  clear_screen
+}
+
+list_branches() {
+  local repo="$1"
+  local remote="$2"
+
+  {
+    git -C "$repo" for-each-ref --sort=-committerdate --format='%(refname:short)' refs/heads
+    git -C "$repo" for-each-ref --sort=-committerdate --format='%(refname:short)' "refs/remotes/$remote" |
+      awk -v remote="$remote" '
+        $0 == remote "/HEAD" { next }
+        index($0, remote "/") == 1 { print substr($0, length(remote) + 2) }
+      '
+  } | awk 'NF && !seen[$0]++'
+}
+
+prompt_for_new_branch() {
+  local default_branch="$1"
+  local branch
+
+  clear_screen
+  printf 'Create a new branch\n\n' >&2
+
+  if [[ -n "$default_branch" ]]; then
+    read -r -p "Branch name [$default_branch]: " branch || exit 0
+    branch="${branch:-$default_branch}"
+  else
+    read -r -p "Branch name: " branch || exit 0
+  fi
+
+  printf '%s' "$branch"
+}
+
+select_branch_with_fzf() {
+  local repo="$1"
+  local remote="$2"
+  local branches
+  local output
+  local status
+  local line_count
+  local query
+  local second_line
+  local selected
+
+  command -v fzf >/dev/null 2>&1 || die "fzf is required but was not found"
+
+  branches="$(list_branches "$repo" "$remote")"
+
+  set +e
+  output="$({
+    if [[ -n "$branches" ]]; then
+      printf '%s\n' "$branches"
+    fi
+  } |
+    fzf \
+      --prompt="branch> " \
+      --height=100% \
+      --layout=reverse \
+      --border \
+      --no-multi \
+      --cycle \
+      --header="Enter: open selected | Ctrl-N: type a new branch | Esc: cancel" \
+      --expect=ctrl-n \
+      --print-query)"
+  status=$?
+  set -e
+
+  if [[ $status -eq 130 || -z "$output" ]]; then
+    exit 0
+  fi
+
+  if [[ $status -ne 0 && $status -ne 1 ]]; then
+    die "fzf failed with exit status $status"
+  fi
+
+  query="$(printf '%s\n' "$output" | sed -n '1p')"
+  second_line="$(printf '%s\n' "$output" | sed -n '2p')"
+  line_count="$(printf '%s\n' "$output" | awk 'END { print NR }')"
+
+  if [[ "$second_line" == "ctrl-n" ]]; then
+    prompt_for_new_branch "$query"
+    return 0
+  fi
+
+  if [[ "$line_count" -ge 2 ]]; then
+    selected="$(printf '%s\n' "$output" | tail -n 1)"
+  else
+    selected="$query"
+  fi
+
+  printf '%s' "$selected"
+}
+
 create_worktree() {
   local repo="$1"
   local branch="$2"
@@ -148,23 +286,15 @@ fi
 
 repo_name="$(basename "$repo")"
 repo_component="$(sanitize_component "$repo_name" "repo" 64)"
-current_branch="$(git -C "$repo" branch --show-current 2>/dev/null || true)"
 
 root_option="$(get_tmux_option "@gwt-root" "$HOME/.local/share/tmux-git-worktrees")"
 root="$(expand_path "$root_option")"
 remote="$(get_tmux_option "@gwt-remote" "origin")"
 default_base="$(get_tmux_option "@gwt-default-base" "HEAD")"
 
-branch="${1:-${GWT_BRANCH:-}}"
+fetch_remote "$repo" "$remote"
 
-if [[ -z "$branch" ]]; then
-  printf 'Repo: %s\n' "$repo"
-  if [[ -n "$current_branch" ]]; then
-    printf 'Current branch: %s\n' "$current_branch"
-  fi
-  printf 'Worktree root: %s\n\n' "$root"
-  read -r -p "Branch name: " branch || exit 0
-fi
+branch="$(select_branch_with_fzf "$repo" "$remote")"
 
 branch="$(trim_whitespace "$branch")"
 
