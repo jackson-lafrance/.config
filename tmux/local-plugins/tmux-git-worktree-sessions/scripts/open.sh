@@ -114,40 +114,16 @@ existing_worktree_for_branch() {
     '
 }
 
-option_enabled() {
-  local option="$1"
-  local default_value="$2"
-  local value
-
-  value="$(get_tmux_option "$option" "$default_value" | LC_ALL=C tr '[:upper:]' '[:lower:]')"
-
-  case "$value" in
-    1 | on | true | yes | enabled) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-fetch_remote() {
+refresh_remote() {
   local repo="$1"
   local remote="$2"
 
-  if ! option_enabled "@gwt-auto-fetch" "on"; then
-    return 0
-  fi
-
   clear_screen
-  printf 'Fetching %s...\n' "$remote" >&2
+  printf 'Refreshing %s...\n' "$remote" >&2
 
-  if option_enabled "@gwt-fetch-prune" "on"; then
-    if ! git -C "$repo" fetch --prune "$remote" >/dev/null 2>&1; then
-      display_message "git fetch --prune $remote failed; branch picker closed"
-      exit 1
-    fi
-  else
-    if ! git -C "$repo" fetch "$remote" >/dev/null 2>&1; then
-      display_message "git fetch $remote failed; branch picker closed"
-      exit 1
-    fi
+  if ! git -C "$repo" fetch --prune --no-tags "$remote" >/dev/null 2>&1; then
+    display_message "git fetch --prune --no-tags $remote failed; branch picker closed"
+    exit 1
   fi
 
   clear_screen
@@ -194,54 +170,68 @@ select_branch_with_fzf() {
   local query
   local second_line
   local selected
+  local initial_query=""
 
   command -v fzf >/dev/null 2>&1 || die "fzf is required but was not found"
 
-  branches="$(list_branches "$repo" "$remote")"
+  while true; do
+    branches="$(list_branches "$repo" "$remote")"
 
-  set +e
-  output="$({
-    if [[ -n "$branches" ]]; then
-      printf '%s\n' "$branches"
+    clear_screen
+
+    set +e
+    output="$({
+      if [[ -n "$branches" ]]; then
+        printf '%s\n' "$branches"
+      fi
+    } |
+      fzf \
+        --prompt="branch> " \
+        --height=100% \
+        --layout=reverse \
+        --border \
+        --no-multi \
+        --cycle \
+        --query="$initial_query" \
+        --header="Enter: open selected | Ctrl-N: new branch | Ctrl-R: refresh refs | Esc: cancel" \
+        --expect=ctrl-n,ctrl-r \
+        --print-query)"
+    status=$?
+    set -e
+
+    if [[ $status -eq 130 || -z "$output" ]]; then
+      exit 0
     fi
-  } |
-    fzf \
-      --prompt="branch> " \
-      --height=100% \
-      --layout=reverse \
-      --border \
-      --no-multi \
-      --cycle \
-      --header="Enter: open selected | Ctrl-N: type a new branch | Esc: cancel" \
-      --expect=ctrl-n \
-      --print-query)"
-  status=$?
-  set -e
 
-  if [[ $status -eq 130 || -z "$output" ]]; then
-    exit 0
-  fi
+    if [[ $status -ne 0 && $status -ne 1 ]]; then
+      die "fzf failed with exit status $status"
+    fi
 
-  if [[ $status -ne 0 && $status -ne 1 ]]; then
-    die "fzf failed with exit status $status"
-  fi
+    query="$(printf '%s\n' "$output" | sed -n '1p')"
+    second_line="$(printf '%s\n' "$output" | sed -n '2p')"
+    line_count="$(printf '%s\n' "$output" | awk 'END { print NR }')"
 
-  query="$(printf '%s\n' "$output" | sed -n '1p')"
-  second_line="$(printf '%s\n' "$output" | sed -n '2p')"
-  line_count="$(printf '%s\n' "$output" | awk 'END { print NR }')"
+    case "$second_line" in
+      ctrl-n)
+        prompt_for_new_branch "$query"
+        return 0
+        ;;
+      ctrl-r)
+        initial_query="$query"
+        refresh_remote "$repo" "$remote"
+        continue
+        ;;
+    esac
 
-  if [[ "$second_line" == "ctrl-n" ]]; then
-    prompt_for_new_branch "$query"
+    if [[ "$line_count" -ge 2 ]]; then
+      selected="$(printf '%s\n' "$output" | tail -n 1)"
+    else
+      selected="$query"
+    fi
+
+    printf '%s' "$selected"
     return 0
-  fi
-
-  if [[ "$line_count" -ge 2 ]]; then
-    selected="$(printf '%s\n' "$output" | tail -n 1)"
-  else
-    selected="$query"
-  fi
-
-  printf '%s' "$selected"
+  done
 }
 
 create_worktree() {
@@ -291,8 +281,6 @@ root_option="$(get_tmux_option "@gwt-root" "$HOME/.local/share/tmux-git-worktree
 root="$(expand_path "$root_option")"
 remote="$(get_tmux_option "@gwt-remote" "origin")"
 default_base="$(get_tmux_option "@gwt-default-base" "HEAD")"
-
-fetch_remote "$repo" "$remote"
 
 branch="$(select_branch_with_fzf "$repo" "$remote")"
 
