@@ -87,16 +87,24 @@ RP_IRIS='%F{#c4a7e7}'
 RP_MUTED='%F{#6e6a86}'
 
 _dotfiles_update_git_prompt() {
-  local branch upstream branch_color
+  local branch upstream branch_color root
   local ahead behind
 
   _prompt_git_info=''
 
-  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || return
+  root=$(git rev-parse --show-toplevel 2>/dev/null) || return
 
   branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null)
   [[ -n "$branch" ]] || branch=$(git rev-parse --short HEAD 2>/dev/null)
   [[ -n "$branch" ]] || return
+
+  # World has hundreds of thousands of files/refs, so dirty/untracked/ahead
+  # checks make every prompt noticeably slow there. Keep the prompt to branch
+  # name only inside World checkouts.
+  if [[ "$root" == "$HOME"/world/trees/*/src ]]; then
+    _prompt_git_info=" ${RP_MUTED}[${RP_PINE}${branch}${RP_MUTED}]${RP_RESET}"
+    return
+  fi
 
   branch_color="$RP_ROSE"
 

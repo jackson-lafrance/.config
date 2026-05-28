@@ -39,3 +39,6 @@ esac
 if typeset -f _dotfiles_source_syntax_highlighting >/dev/null 2>&1; then
   _dotfiles_source_syntax_highlighting
 fi
+
+# Added by tec agent
+[[ -x /Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init ]] && eval "$(/Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init zsh)"

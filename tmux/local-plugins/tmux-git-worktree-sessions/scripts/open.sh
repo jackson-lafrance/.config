@@ -129,17 +129,28 @@ refresh_remote() {
   clear_screen
 }
 
+is_world_repo() {
+  local repo="$1"
+
+  [[ "$repo" == "$HOME"/world/trees/*/src ]]
+}
+
 list_branches() {
   local repo="$1"
   local remote="$2"
 
   {
     git -C "$repo" for-each-ref --sort=-committerdate --format='%(refname:short)' refs/heads
-    git -C "$repo" for-each-ref --sort=-committerdate --format='%(refname:short)' "refs/remotes/$remote" |
-      awk -v remote="$remote" '
-        $0 == remote "/HEAD" { next }
-        index($0, remote "/") == 1 { print substr($0, length(remote) + 2) }
-      '
+
+    # World has hundreds of thousands of remote refs. Listing them makes the
+    # picker feel frozen, and World worktrees are normally managed with `dev tree`.
+    if ! is_world_repo "$repo"; then
+      git -C "$repo" for-each-ref --sort=-committerdate --format='%(refname:short)' "refs/remotes/$remote" |
+        awk -v remote="$remote" '
+          $0 == remote "/HEAD" { next }
+          index($0, remote "/") == 1 { print substr($0, length(remote) + 2) }
+        '
+    fi
   } | awk 'NF && !seen[$0]++'
 }
 
