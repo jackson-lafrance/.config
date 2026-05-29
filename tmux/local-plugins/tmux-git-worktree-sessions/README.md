@@ -39,6 +39,7 @@ set -g @gwt-root "$HOME/src/git-worktrees"
 set -g @gwt-open-key "G"
 set -g @gwt-default-base "main"
 set -g @gwt-remote "origin"
+set -g @gwt-kill-source-session "on"
 run-shell '~/.config/tmux/local-plugins/tmux-git-worktree-sessions/tmux-git-worktree-sessions.tmux'
 ```
 
@@ -48,6 +49,7 @@ Options:
 - `@gwt-open-key`: tmux prefix binding. Defaults to `G`.
 - `@gwt-default-base`: base ref used when creating a new branch. Defaults to `HEAD`.
 - `@gwt-remote`: remote checked for existing remote branches and refreshed by `Ctrl-R`. Defaults to `origin`.
+- `@gwt-kill-source-session`: when set to `on`, the plugin cleans up the previous tmux session after a successful branch switch, but only if that session is another generated gwt session for the same repo and appears empty. Defaults to `off`.
 - `@gwt-popup-width`: popup width. Defaults to `80%`.
 - `@gwt-popup-height`: popup height. Defaults to `60%`.
 
@@ -64,6 +66,8 @@ The hash prevents collisions between branch names that sanitize to the same path
 ## Safety notes
 
 The plugin does not run `git checkout` in your current checkout. It uses `git worktree`, so each branch gets isolated files and an isolated Git index.
+
+When `@gwt-kill-source-session` is `on`, session cleanup is intentionally conservative. The plugin only kills the session you switched away from when it is detached, marked as gwt-managed or matches the generated session naming scheme, has one window, has one pane, and that pane is sitting at a shell. Sessions with editors, running foreground commands, multiple panes, multiple windows, or other attached clients are left alone.
 
 The plugin does not delete worktrees. Cleanup should be done manually for now:
 

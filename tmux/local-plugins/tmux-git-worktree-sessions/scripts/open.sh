@@ -114,6 +114,100 @@ existing_worktree_for_branch() {
     '
 }
 
+is_truthy() {
+  local value
+
+  value="$(printf '%s' "$1" | LC_ALL=C tr '[:upper:]' '[:lower:]')"
+
+  case "$value" in
+    1 | on | true | yes | y)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_shell_command() {
+  local command="$1"
+  local shell_name="${SHELL##*/}"
+
+  command="${command#-}"
+
+  case "$command" in
+    "$shell_name" | sh | bash | zsh | fish | nu | elvish | ksh | dash | tcsh | csh)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+mark_gwt_session() {
+  local target="$1"
+  local repo="$2"
+
+  tmux set-option -q -t "$target" @gwt-managed-session "1" 2>/dev/null || true
+  tmux set-option -q -t "$target" @gwt-repo-root "$repo" 2>/dev/null || true
+}
+
+source_session_is_managed() {
+  local source_session_id="$1"
+  local source_session_name="$2"
+  local repo_component="$3"
+  local repo="$4"
+  local managed
+  local managed_repo
+
+  managed="$(tmux show-option -qv -t "$source_session_id" @gwt-managed-session 2>/dev/null || true)"
+  managed_repo="$(tmux show-option -qv -t "$source_session_id" @gwt-repo-root 2>/dev/null || true)"
+
+  if [[ "$managed" == "1" && ( -z "$managed_repo" || "$managed_repo" == "$repo" ) ]]; then
+    return 0
+  fi
+
+  # Migration fallback for sessions created before @gwt-managed-session existed.
+  [[ "$source_session_name" == "$repo_component-"* ]]
+}
+
+session_appears_empty() {
+  local target="$1"
+  local attached_count
+  local window_count
+  local pane_count
+  local pane_command
+
+  attached_count="$(tmux display-message -p -t "$target" '#{session_attached}' 2>/dev/null || true)"
+  window_count="$(tmux display-message -p -t "$target" '#{session_windows}' 2>/dev/null || true)"
+  pane_count="$(tmux list-panes -s -t "$target" -F '#{pane_id}' 2>/dev/null | wc -l | tr -d '[:space:]' || true)"
+  pane_command="$(tmux list-panes -s -t "$target" -F '#{pane_current_command}' 2>/dev/null | sed -n '1p' || true)"
+
+  [[ "$attached_count" == "0" ]] || return 1
+  [[ "$window_count" == "1" ]] || return 1
+  [[ "$pane_count" == "1" ]] || return 1
+  is_shell_command "$pane_command"
+}
+
+maybe_kill_source_session() {
+  local enabled="$1"
+  local source_session_id="$2"
+  local source_session_name="$3"
+  local target_session_name="$4"
+  local repo_component="$5"
+  local repo="$6"
+
+  is_truthy "$enabled" || return 0
+  [[ -n "$source_session_id" && -n "$source_session_name" ]] || return 0
+  [[ "$source_session_name" != "$target_session_name" ]] || return 0
+  tmux has-session -t "$source_session_id" 2>/dev/null || return 0
+  source_session_is_managed "$source_session_id" "$source_session_name" "$repo_component" "$repo" || return 0
+  session_appears_empty "$source_session_id" || return 0
+
+  tmux kill-session -t "$source_session_id" 2>/dev/null || true
+}
+
 refresh_remote() {
   local repo="$1"
   local remote="$2"
@@ -279,6 +373,9 @@ if [[ -z "${TMUX:-}" ]]; then
   die "This command must run inside tmux"
 fi
 
+source_session_id="$(tmux display-message -p '#{session_id}' 2>/dev/null || true)"
+source_session_name="$(tmux display-message -p '#{session_name}' 2>/dev/null || true)"
+
 repo="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 
 if [[ -z "$repo" ]]; then
@@ -292,6 +389,7 @@ root_option="$(get_tmux_option "@gwt-root" "$HOME/.local/share/tmux-git-worktree
 root="$(expand_path "$root_option")"
 remote="$(get_tmux_option "@gwt-remote" "origin")"
 default_base="$(get_tmux_option "@gwt-default-base" "HEAD")"
+kill_source_session="$(get_tmux_option "@gwt-kill-source-session" "off")"
 
 branch="$(select_branch_with_fzf "$repo" "$remote")"
 
@@ -338,10 +436,14 @@ else
 fi
 
 if tmux has-session -t "=$session_name" 2>/dev/null; then
+  mark_gwt_session "$session_name" "$repo"
   tmux switch-client -t "=$session_name" || die "Failed to switch to tmux session $session_name"
 else
   tmux new-session -d -s "$session_name" -n "$branch" -c "$worktree" || die "Failed to create tmux session $session_name"
+  mark_gwt_session "$session_name" "$repo"
   tmux switch-client -t "=$session_name" || die "Failed to switch to tmux session $session_name"
 fi
+
+maybe_kill_source_session "$kill_source_session" "$source_session_id" "$source_session_name" "$session_name" "$repo_component" "$repo"
 
 display_message "switched to $branch at $worktree"

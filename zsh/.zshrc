@@ -2,6 +2,7 @@
 
 export ZSH_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
 export DOTFILES_PROFILE_FILE="$ZSH_CONFIG_DIR/.profile.local.zsh"
+export PATH="$HOME/.gem/ruby/4.0.0/bin:$PATH"
 
 if [[ -f "$ZSH_CONFIG_DIR/common.zsh" ]]; then
   source "$ZSH_CONFIG_DIR/common.zsh"
