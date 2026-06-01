@@ -20,6 +20,13 @@ path_prepend "$PNPM_HOME"
 alias vim='nvim'
 alias claude='claude --dangerously-skip-permissions'
 
+export JUNIT_JAR="$HOME/lib/junit-platform-console-standalone.jar"
+alias jcompile='javac -cp ".:$JUNIT_JAR" *.java ods/*.java'
+jtest() {
+  java -jar "$JUNIT_JAR" --class-path . --select-class "$1"
+}
+alias jtestall='java -jar "$JUNIT_JAR" --class-path . --scan-class-path'
+
 sz() {
   source "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/.zshrc"
 
@@ -158,4 +165,16 @@ _dotfiles_source_syntax_highlighting() {
       return
     fi
   done
+}
+
+pi() {
+  # Dynamically symlink settings and models based on the hostname of the active machine
+  if [[ "$(hostname)" == *"jacksons-macbook-pro"* ]]; then
+    ln -sf "$HOME/.pi/agent/settings.work.json" "$HOME/.pi/agent/settings.json"
+    ln -sf "$HOME/.pi/agent/models.work.json" "$HOME/.pi/agent/models.json"
+  else
+    ln -sf "$HOME/.pi/agent/settings.personal.json" "$HOME/.pi/agent/settings.json"
+    ln -sf "$HOME/.pi/agent/models.personal.json" "$HOME/.pi/agent/models.json"
+  fi
+  command pi "$@"
 }
