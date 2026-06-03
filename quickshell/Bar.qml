@@ -57,6 +57,11 @@ PanelWindow {
       barWindow: root
     }
 
+    SystemTrayWidget {
+      Layout.fillHeight: true
+      barWindow: root
+    }
+
     Clock {
       Layout.fillHeight: true
     }
