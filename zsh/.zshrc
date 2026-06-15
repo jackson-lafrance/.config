@@ -2,12 +2,15 @@
 
 export ZSH_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
 export DOTFILES_PROFILE_FILE="$ZSH_CONFIG_DIR/.profile.local.zsh"
-export PATH="$HOME/.gem/ruby/4.0.0/bin:$PATH"
 
 if [[ -f "$ZSH_CONFIG_DIR/common.zsh" ]]; then
   source "$ZSH_CONFIG_DIR/common.zsh"
 else
   print -u2 "dotfiles: missing shared zsh config: $ZSH_CONFIG_DIR/common.zsh"
+fi
+
+if typeset -f path_prepend >/dev/null 2>&1; then
+  path_prepend "$HOME/.gem/ruby/4.0.0/bin"
 fi
 
 if [[ -f "$DOTFILES_PROFILE_FILE" ]]; then
@@ -41,5 +44,6 @@ if typeset -f _dotfiles_source_syntax_highlighting >/dev/null 2>&1; then
   _dotfiles_source_syntax_highlighting
 fi
 
+
 # Added by tec agent
-[[ -x "$HOME/.local/state/tec/profiles/base/current/global/init" ]] && eval "$("$HOME/.local/state/tec/profiles/base/current/global/init" zsh)"
+[[ -x /Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init ]] && eval "$(/Users/jacksonlafranceshopify/.local/state/tec/profiles/base/current/global/init zsh)"

@@ -229,6 +229,75 @@ is_world_repo() {
   [[ "$repo" == "$HOME"/world/trees/*/src ]]
 }
 
+world_tree_id_from_path() {
+  local path="$1"
+  local relative
+
+  case "$path" in
+    "$HOME"/world/trees/*)
+      relative="${path#"$HOME"/world/trees/}"
+      printf '%s' "${relative%%/*}"
+      ;;
+    *)
+      printf 'world'
+      ;;
+  esac
+}
+
+switch_with_dev_tree() {
+  local finalizers_file
+  local status
+  local line
+  local destination=""
+  local tree_id
+  local session_name
+  local window_name
+
+  command -v dev >/dev/null 2>&1 || die "World worktrees should be managed with dev tree, but dev was not found"
+
+  finalizers_file="$(mktemp "${TMPDIR:-/tmp}/gwt-dev-tree-finalizers.XXXXXX")" || die "Failed to create finalizer tempfile"
+
+  set +e
+  dev tree switch 9>"$finalizers_file"
+  status=$?
+  set -e
+
+  if [[ $status -ne 0 ]]; then
+    rm -f "$finalizers_file"
+    display_message "dev tree switch failed"
+    pause_before_exit
+    exit "$status"
+  fi
+
+  while IFS= read -r line; do
+    case "$line" in
+      cd:*)
+        destination="${line#cd:}"
+        ;;
+    esac
+  done < "$finalizers_file"
+
+  rm -f "$finalizers_file"
+
+  # Cancelling the picker or selecting the current tree produces no cd finalizer.
+  [[ -n "$destination" ]] || exit 0
+
+  [[ -d "$destination" ]] || die "dev tree returned a directory that does not exist: $destination"
+
+  tree_id="$(world_tree_id_from_path "$destination")"
+  session_name="$(sanitize_component "world-$tree_id" "world-tree" 80)"
+  window_name="$(sanitize_component "$tree_id" "tree" 40)"
+
+  if tmux has-session -t "=$session_name" 2>/dev/null; then
+    tmux switch-client -t "=$session_name" || die "Failed to switch to tmux session $session_name"
+  else
+    tmux new-session -d -s "$session_name" -n "$window_name" -c "$destination" || die "Failed to create tmux session $session_name"
+    tmux switch-client -t "=$session_name" || die "Failed to switch to tmux session $session_name"
+  fi
+
+  display_message "switched to dev tree $tree_id at $destination"
+}
+
 list_branches() {
   local repo="$1"
   local remote="$2"
@@ -380,6 +449,11 @@ repo="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 
 if [[ -z "$repo" ]]; then
   die "Not inside a Git repository"
+fi
+
+if is_world_repo "$repo"; then
+  switch_with_dev_tree
+  exit 0
 fi
 
 repo_name="$(basename "$repo")"

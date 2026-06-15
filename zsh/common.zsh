@@ -42,12 +42,24 @@ setopt SHARE_HISTORY
 setopt HIST_IGNORE_DUPS
 setopt HIST_IGNORE_SPACE
 
-autoload -Uz compinit && compinit
+autoload -Uz compinit
+_zcompdump_dir="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+_zcompdump_file="$_zcompdump_dir/zcompdump-${ZSH_VERSION}"
+mkdir -p "$_zcompdump_dir"
+
+if [[ -f "$_zcompdump_file" ]]; then
+  compinit -C -d "$_zcompdump_file"
+else
+  compinit -d "$_zcompdump_file"
+fi
+
+unset _zcompdump_dir _zcompdump_file
+
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 setopt AUTO_MENU
 setopt COMPLETE_IN_WORD
 
-if command -v fzf >/dev/null 2>&1 && fzf --zsh >/dev/null 2>&1; then
+if [[ -t 0 && -t 1 ]] && command -v fzf >/dev/null 2>&1; then
   source <(fzf --zsh)
 fi
 
@@ -139,9 +151,40 @@ _dotfiles_update_git_prompt() {
   _prompt_git_info=" ${RP_MUTED}[${branch_color}${branch}${RP_MUTED}]${RP_RESET}"
 }
 
+typeset -g _dotfiles_git_prompt_cache_pwd=''
+typeset -gi _dotfiles_git_prompt_cache_time=0
+typeset -gi _dotfiles_git_prompt_cache_dirty=1
+
+_dotfiles_invalidate_git_prompt_cache() {
+  case "$1" in
+    git|git\ *|g|g\ *|dev|dev\ *|tec|tec\ *)
+      _dotfiles_git_prompt_cache_dirty=1
+      ;;
+  esac
+}
+
+_dotfiles_update_git_prompt_cached() {
+  local ttl="${DOTFILES_GIT_PROMPT_TTL:-5}"
+  [[ "$ttl" == <-> ]] || ttl=5
+
+  if [[ "$PWD" == "$_dotfiles_git_prompt_cache_pwd" \
+    && "$_dotfiles_git_prompt_cache_dirty" -eq 0 \
+    && $(( SECONDS - _dotfiles_git_prompt_cache_time )) -lt "$ttl" ]]; then
+    return
+  fi
+
+  _dotfiles_update_git_prompt
+  _dotfiles_git_prompt_cache_pwd="$PWD"
+  _dotfiles_git_prompt_cache_time="$SECONDS"
+  _dotfiles_git_prompt_cache_dirty=0
+}
+
 autoload -Uz add-zsh-hook
 add-zsh-hook -d precmd _dotfiles_update_git_prompt 2>/dev/null
-add-zsh-hook precmd _dotfiles_update_git_prompt
+add-zsh-hook -d precmd _dotfiles_update_git_prompt_cached 2>/dev/null
+add-zsh-hook -d preexec _dotfiles_invalidate_git_prompt_cache 2>/dev/null
+add-zsh-hook precmd _dotfiles_update_git_prompt_cached
+add-zsh-hook preexec _dotfiles_invalidate_git_prompt_cache
 
 setopt prompt_subst
 PROMPT='${RP_FOAM}%~${RP_RESET}${_prompt_git_info} ${RP_MUTED}%#${RP_RESET} '
