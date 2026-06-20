@@ -39,6 +39,12 @@ case "${DOTFILES_PROFILE:-}" in
     ;;
 esac
 
+# ESP-IDF environment helper.
+# Run `get_idf` in a terminal before using idf.py.
+get_idf() {
+  source "$HOME/esp-idf/export.sh"
+}
+
 # Syntax highlighting should be loaded after aliases, widgets, and profile setup.
 if typeset -f _dotfiles_source_syntax_highlighting >/dev/null 2>&1; then
   _dotfiles_source_syntax_highlighting
