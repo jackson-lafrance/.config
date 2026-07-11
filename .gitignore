@@ -7,6 +7,11 @@
 !hypr/
 !quickshell/
 !dunst/
+!herdr/
+!git/
+!graphite/
+!river-ci-watch/
+!sho-pi-ci/
 !nvim/**
 !zsh/**
 !tmux/**
@@ -14,12 +19,36 @@
 !hypr/**
 !quickshell/**
 !dunst/**
+!herdr/**
+!git/**
+!graphite/**
+!river-ci-watch/**
+!sho-pi-ci/**
+
+# herdr runtime state (sockets, logs, session, release notes)
+herdr/*.sock
+herdr/*.log
+herdr/session.json
+herdr/release-notes.json
+
+# graphite auth tokens
+graphite/auth
+graphite/user_config
 
 # Machine-local editor/agent state and secrets.
 .ruby-lsp/
 .DS_Store
 configstore/
 gh/
+agent-tools/
+gcloud/
+quick/
+containers/
+psst/
+dev/
+opencode-shopify/
+shadowenv/
+uv/
 nvim/.claude/
 nvim/.ruby-lsp/
 zsh/*.local.zsh

@@ -1,0 +1,20 @@
+{
+  "pollIntervalSeconds": 60,
+  "statePath": "~/.local/state/river-ci-watch/state.json",
+  "agent": {
+    "cwd": "~/world/trees/root/src/areas/core/shopify",
+    "command": "pi",
+    "tools": ["read", "bash", "edit", "write", "grep", "find", "ls"],
+    "thinking": "medium",
+    "maxConcurrent": 1
+  },
+  "ci": {
+    "zone": "areas/core/shopify",
+    "logExcerptMaxBytes": 20000,
+    "logExcerptMaxLines": 400
+  },
+  "ui": {
+    "openCommandMacos": "open",
+    "openCommandLinux": "xdg-open"
+  }
+}

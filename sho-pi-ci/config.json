@@ -1,0 +1,35 @@
+{
+  "pollIntervalSeconds": 60,
+  "statePath": "~/.local/state/sho-pi-ci/state.json",
+  "agent": {
+    "cwd": "~/world/trees/root/src/areas/core/shopify",
+    "command": "pi",
+    "tools": ["read", "bash", "edit", "write", "grep", "find", "ls"],
+    "thinking": "medium",
+    "maxConcurrent": 0,
+    "retryFailedAgentsOnRestart": true,
+    "usePerPrWorktree": true,
+    "worktreeBasePath": "~/world/trees",
+    "worktreeNamePrefix": "sho-pi-ci",
+    "worktreeZonePath": "areas/core/shopify"
+  },
+  "github": {
+    "autoAddAssignedPrs": true,
+    "assignedPrLimit": 100
+  },
+  "ci": {
+    "zone": "areas/core/shopify",
+    "devxCommand": "/opt/dev/bin/devx",
+    "triggerFullOnEnable": true,
+    "openViaDevx": true,
+    "logExcerptMaxBytes": 20000,
+    "logExcerptMaxLines": 400
+  },
+  "gitstream": {
+    "devCommand": "/opt/dev/bin/dev"
+  },
+  "ui": {
+    "openCommandMacos": "open",
+    "openCommandLinux": "xdg-open"
+  }
+}
