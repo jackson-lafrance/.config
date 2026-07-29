@@ -1,7 +1,9 @@
 # Copy this file to zsh/.profile.local.zsh on each machine.
 # zsh/.profile.local.zsh is ignored by git so machine-local choices and secrets stay private.
 
-# Pick exactly one:
-# export DOTFILES_PROFILE=personal
-# export DOTFILES_PROFILE=shopify
-# export DOTFILES_PROFILE=arch
+# Pick exactly one. With nothing set, the shell falls back to personal, so a
+# personal machine never loads Shopify paths, aliases, or agent settings by
+# accident. Only set shopify on a work machine.
+# export DOTFILES_PROFILE=personal   # macOS/personal (default when unset)
+# export DOTFILES_PROFILE=arch       # personal Arch/Linux desktop
+# export DOTFILES_PROFILE=shopify    # work machine only: adds zsh/profiles/shopify.zsh

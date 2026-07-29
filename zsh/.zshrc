@@ -16,28 +16,35 @@ fi
 if [[ -f "$DOTFILES_PROFILE_FILE" ]]; then
   source "$DOTFILES_PROFILE_FILE"
 else
-  print -u2 "dotfiles: missing $DOTFILES_PROFILE_FILE"
-  print -u2 "dotfiles: copy $ZSH_CONFIG_DIR/.profile.local.zsh.example to $DOTFILES_PROFILE_FILE"
-  print -u2 "dotfiles: then set: export DOTFILES_PROFILE=personal|shopify|arch"
+  print -u2 "dotfiles: no $DOTFILES_PROFILE_FILE; using the personal profile"
+  print -u2 "dotfiles: copy $ZSH_CONFIG_DIR/.profile.local.zsh.example to $DOTFILES_PROFILE_FILE to change it"
 fi
 
+# Work tooling is strictly opt-in. Only an explicit DOTFILES_PROFILE=shopify
+# loads it; a fresh clone, an unset value, or a typo all resolve to personal.
+# That is what keeps a personal machine free of Shopify paths, aliases, and
+# agent settings even though this repo is shared between both machines.
 case "${DOTFILES_PROFILE:-}" in
-  personal|arch)
-    ;;
-  shopify)
-    if [[ -f "$ZSH_CONFIG_DIR/profiles/shopify.zsh" ]]; then
-      source "$ZSH_CONFIG_DIR/profiles/shopify.zsh"
-    else
-      print -u2 "dotfiles: missing Shopify profile: $ZSH_CONFIG_DIR/profiles/shopify.zsh"
-    fi
+  shopify|personal|arch)
     ;;
   "")
-    print -u2 "dotfiles: DOTFILES_PROFILE is not set; expected personal, shopify, or arch"
+    DOTFILES_PROFILE=personal
     ;;
   *)
-    print -u2 "dotfiles: unknown DOTFILES_PROFILE='$DOTFILES_PROFILE'; expected personal, shopify, or arch"
+    print -u2 "dotfiles: unknown DOTFILES_PROFILE='$DOTFILES_PROFILE'; using personal"
+    DOTFILES_PROFILE=personal
     ;;
 esac
+
+export DOTFILES_PROFILE
+
+if [[ "$DOTFILES_PROFILE" == "shopify" ]]; then
+  if [[ -f "$ZSH_CONFIG_DIR/profiles/shopify.zsh" ]]; then
+    source "$ZSH_CONFIG_DIR/profiles/shopify.zsh"
+  else
+    print -u2 "dotfiles: missing Shopify profile: $ZSH_CONFIG_DIR/profiles/shopify.zsh"
+  fi
+fi
 
 # ESP-IDF environment helper.
 # Run `get_idf` in a terminal before using idf.py.

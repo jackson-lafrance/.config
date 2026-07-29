@@ -210,14 +210,32 @@ _dotfiles_source_syntax_highlighting() {
   done
 }
 
+# Pi keeps a settings/models pair per machine profile. Link the active pair
+# before launching so each machine gets its own agent config.
+#
+# The selector is DOTFILES_PROFILE rather than the hostname on purpose: a
+# hostname like "jacksons-macbook-pro" is plausible on a personal Mac too, and
+# guessing wrong would silently hand work settings to a personal machine.
+# Anything other than an explicit shopify profile resolves to personal.
+#
+# Missing variants are skipped instead of linked, because `ln -sf` to a
+# nonexistent target leaves a dangling symlink that pi then fails to read.
 pi() {
-  # Dynamically symlink settings and models based on the hostname of the active machine
-  if [[ "$(hostname)" == *"jacksons-macbook-pro"* ]]; then
-    ln -sf "$HOME/.pi/agent/settings.work.json" "$HOME/.pi/agent/settings.json"
-    ln -sf "$HOME/.pi/agent/models.work.json" "$HOME/.pi/agent/models.json"
-  else
-    ln -sf "$HOME/.pi/agent/settings.personal.json" "$HOME/.pi/agent/settings.json"
-    ln -sf "$HOME/.pi/agent/models.personal.json" "$HOME/.pi/agent/models.json"
+  local agent_dir="$HOME/.pi/agent"
+  local variant="personal"
+  local kind target
+
+  if [[ "${DOTFILES_PROFILE:-personal}" == "shopify" ]]; then
+    variant="work"
   fi
+
+  for kind in settings models; do
+    target="$agent_dir/$kind.$variant.json"
+
+    if [[ -f "$target" ]]; then
+      ln -sf "$target" "$agent_dir/$kind.json"
+    fi
+  done
+
   command pi "$@"
 }
