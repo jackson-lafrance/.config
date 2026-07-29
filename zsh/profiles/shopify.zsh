@@ -22,3 +22,7 @@ path_prepend "$PNPM_HOME"
 alias prd='pnpm run dev'
 alias prs='pnpm run start'
 alias prc='pnpm run compile'
+
+# Always launch Shopify's World-aware Herdr wrapper.
+alias herdr='devx herdr'
+alias h='devx herdr'

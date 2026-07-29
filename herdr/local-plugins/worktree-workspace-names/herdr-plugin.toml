@@ -1,0 +1,24 @@
+id = "jl.worktree-workspace-names"
+name = "Worktree Workspace Names"
+version = "0.1.0"
+min_herdr_version = "0.7.1"
+description = "Name worktree workspaces after their Git branch so agent cards are distinguishable"
+platforms = ["linux", "macos"]
+
+[[actions]]
+id = "sync"
+title = "Sync worktree workspace names"
+contexts = ["workspace"]
+command = ["bash", "rename-workspaces.sh", "sync"]
+
+[[events]]
+on = "worktree.created"
+command = ["bash", "rename-workspaces.sh", "event"]
+
+[[events]]
+on = "worktree.opened"
+command = ["bash", "rename-workspaces.sh", "event"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["bash", "rename-workspaces.sh", "event"]
