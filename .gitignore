@@ -1,5 +1,6 @@
 *
 !.gitignore
+!README.md
 !nvim/
 !zsh/
 !tmux/
@@ -30,6 +31,8 @@ herdr/*.sock
 herdr/*.log
 herdr/session.json
 herdr/release-notes.json
+herdr/plugins.json
+herdr/.plugins.lock
 
 # graphite auth tokens
 graphite/auth
