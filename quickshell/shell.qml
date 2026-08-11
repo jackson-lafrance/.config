@@ -21,4 +21,6 @@ Scope {
 
     SecondaryBar {}
   }
+
+  DictationWordPopup {}
 }

@@ -57,6 +57,10 @@ Optional dependencies, all degraded gracefully when missing: `rg`, `fzf`, `eza`,
 | `<leader>fW`  | live grep from the process cwd                            |
 | `<leader>fr`  | jump to the Ruby reference under the cursor/selection      |
 | `<leader>fR`  | jump to a Ruby reference from the clipboard or a prompt    |
+| `<leader>vp`  | open Pi interactive mode in a Neovim terminal split        |
+| `<leader>va`  | paste cursor/selection/current-buffer context into Pi      |
+| `<leader>vv`  | paste that context into Pi and start nerd-dictation        |
+| `<leader>vx`  | close the Pi terminal split/session                        |
 | `:RubyRef …`  | jump to the given Ruby reference                           |
 
 Inside a picker, `<C-h>` toggles hidden files and `<C-g>` toggles noisy

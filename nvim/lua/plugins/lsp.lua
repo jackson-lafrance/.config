@@ -8,6 +8,18 @@ vim.pack.add({
 })
 
 require("mason").setup()
-require("mason-lspconfig").setup()
+require("mason-lspconfig").setup({
+  ensure_installed = {
+    "rubocop",
+  },
+  automatic_enable = {
+    exclude = {
+      "ruby_lsp",
+      "standardrb",
+      "sorbet",
+      "steep",
+    },
+  },
+})
 
 map("n", "<leader>m", ":Mason<CR>", { desc = "Opens mason" })
