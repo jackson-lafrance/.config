@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "project": "/Users/jacksonlafranceshopify/.config/nvim/lua/plugins",
+  "updatedAt": 1788536586601,
+  "patterns": [
+    {
+      "id": "42b718ac110c",
+      "label": "path-read-preflight",
+      "project": "/Users/jacksonlafranceshopify/.config/nvim/lua/plugins",
+      "refs": [
+        "PiProvider.fetch",
+        "vim.system",
+        "vim.schedule",
+        "obj.code",
+        "table.insert",
+        "vim.keymap.set",
+        "vim.pack.add",
+        "Providers.BaseProv"
+      ],
+      "intentTags": [],
+      "count": 1,
+      "confidence": 1,
+      "futures": [
+        {
+          "key": "pi_blitz:batch",
+          "armed": 1,
+          "hits": 0,
+          "misses": 0,
+          "rejections": 0,
+          "savedMs": 0,
+          "lastSeenAt": 1788536586601
+        }
+      ],
+      "createdAt": 1788536586601,
+      "updatedAt": 1788536586601
+    }
+  ],
+  "events": [
+    {
+      "at": 1788536586601,
+      "type": "pattern_observed",
+      "message": "path-read-preflight observed",
+      "details": {
+        "refs": [
+          "PiProvider.fetch",
+          "vim.system",
+          "vim.schedule",
+          "obj.code",
+          "table.insert",
+          "vim.keymap.set",
+          "vim.pack.add",
+          "Providers.BaseProv"
+        ],
+        "intentTags": [],
+        "futures": []
+      }
+    }
+  ]
+}

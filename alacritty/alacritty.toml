@@ -66,7 +66,7 @@ bindings = [
   { key = "F", mods = "Command|Shift", action = "ToggleFullscreen" },
 
   # Linux-style bindings from the Arch config.
-  { key = "T", mods = "Control", action = "CreateNewTab" },
+  { key = "N", mods = "Control", action = "CreateNewTab" },
   { key = "T", mods = "Control|Shift", action = "CreateNewWindow" },
   { key = "T", mods = "Control|Alt|Shift", action = "SpawnNewInstance" },
   { key = "C", mods = "Control|Shift", action = "Copy" },

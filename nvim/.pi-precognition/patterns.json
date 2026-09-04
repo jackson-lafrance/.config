@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "project": "/Users/jacksonlafranceshopify/.config/nvim",
+  "updatedAt": 1788537012655,
+  "patterns": [
+    {
+      "id": "5da115d2c35f",
+      "label": "path-read-preflight",
+      "project": "/Users/jacksonlafranceshopify/.config/nvim",
+      "refs": [
+        "/path/to/project/src/foo.js",
+        "/path/to/project/src/bar.js",
+        "/path/to/project/src/baz.js",
+        "/path/to/file.ext",
+        "foo.js",
+        "bar.js",
+        "baz.js"
+      ],
+      "intentTags": [],
+      "count": 1,
+      "confidence": 1,
+      "futures": [
+        {
+          "key": "pi_blitz:batch",
+          "armed": 1,
+          "hits": 0,
+          "misses": 0,
+          "rejections": 0,
+          "savedMs": 0,
+          "lastSeenAt": 1788537012654
+        }
+      ],
+      "createdAt": 1788537012654,
+      "updatedAt": 1788537012654
+    }
+  ],
+  "events": [
+    {
+      "at": 1788537012654,
+      "type": "pattern_observed",
+      "message": "path-read-preflight observed",
+      "details": {
+        "refs": [
+          "/path/to/project/src/foo.js",
+          "/path/to/project/src/bar.js",
+          "/path/to/project/src/baz.js",
+          "/path/to/file.ext",
+          "foo.js",
+          "bar.js",
+          "baz.js"
+        ],
+        "intentTags": [],
+        "futures": []
+      }
+    }
+  ]
+}

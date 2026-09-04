@@ -25,6 +25,9 @@ opt.mouse = ""
 opt.swapfile = false
 opt.undofile = true
 
+-- Diffs: side by side, aligned by line content, better hunk boundaries.
+opt.diffopt:append({ "vertical", "linematch:60", "algorithm:histogram" })
+
 require("plugins")
 require("remap")
 require("autocomplete")
