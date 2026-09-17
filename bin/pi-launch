@@ -1,0 +1,65 @@
+#!/bin/zsh -f
+
+# Share one entry point without sourcing interactive shell setup or changing
+# settings/model links. Machine-local exports also work for editor launches.
+config_dir="${XDG_CONFIG_HOME:-$HOME/.config}"
+profile_file="$config_dir/zsh/.profile.local.zsh"
+if [[ -f "$profile_file" ]]; then
+  source "$profile_file" > /dev/null || exit 1
+fi
+
+case "${DOTFILES_PROFILE:-}" in
+  shopify|personal|arch) ;;
+  "") DOTFILES_PROFILE=personal ;;
+  *)
+    print -ru2 -- 'pi-launch: unknown machine profile; using personal'
+    DOTFILES_PROFILE=personal
+    ;;
+esac
+export DOTFILES_PROFILE
+
+# Use the stable TEC entry point on work machines, including when the parent
+# process has Pi's internal Nix executable at the front of PATH.
+executable=''
+if [[ "$DOTFILES_PROFILE" == shopify ]]; then
+  executable="$HOME/.local/state/tec/profiles/base/current/global/bin/pi"
+else
+  for directory in "${path[@]}"; do
+    candidate="${directory:-.}/pi"
+    if [[ -x "$candidate" && ! -d "$candidate" && ! "$candidate" -ef "$0" ]]; then
+      executable="${candidate:a}"
+      break
+    fi
+  done
+fi
+
+if [[ -z "$executable" || ! -x "$executable" || -d "$executable" || "$executable" -ef "$0" ]]; then
+  print -ru2 -- 'pi-launch: no Pi executable is available for this machine profile'
+  exit 127
+fi
+
+# Respect Pi's explicit directory override; otherwise keep its existing global
+# directory. No credentials, settings, sessions, or extensions are copied.
+agent_dir="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
+case "$agent_dir" in
+  '~'|'~/'*) agent_dir="$HOME${agent_dir#\~}" ;;
+esac
+agent_dir="${agent_dir:a}"
+export PI_CODING_AGENT_DIR="$agent_dir"
+
+# stdout belongs to Pi: RPC/JSON framing and --list-models must stay intact.
+# Never print argv, credentials, headers, or the full environment/settings.
+printf 'pi-launch: profile=%s\npi-launch: executable=%s\npi-launch: agent_dir=%s\n' \
+  "$DOTFILES_PROFILE" "$executable" "$agent_dir" >&2
+
+if (( $# == 1 )) && [[ "$1" == --launcher-info ]]; then
+  settings_file="$agent_dir/settings.json"
+  models_file="$agent_dir/models.json"
+  printf 'pi-launch: settings=%s\npi-launch: models=%s\n' \
+    "${settings_file:A}" "${models_file:A}" >&2
+  printf 'pi-launch: project_settings_candidate=%s/.pi/settings.json\n' "$PWD" >&2
+  print -ru2 -- 'pi-launch: active model is reported by Pi in its footer or RPC get_state'
+  exit 0
+fi
+
+exec "$executable" "$@"

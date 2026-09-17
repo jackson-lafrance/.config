@@ -1,9 +1,5 @@
 {
   "plugins": {
-    "99": {
-      "rev": "c17422457027c913c76c75a921fca1e623d2678e",
-      "src": "https://github.com/ThePrimeagen/99"
-    },
     "fzf-lua": {
       "rev": "05e44d38de0a79c11fba5f7bf8138791b1dbdd1e",
       "src": "https://github.com/ibhagwan/fzf-lua"
@@ -51,6 +47,11 @@
     "vim-fugitive": {
       "rev": "3b753cf8c6a4dcde6edee8827d464ba9b8c4a6f0",
       "src": "https://github.com/tpope/vim-fugitive"
+    },
+    "vimgentic": {
+      "rev": "8a72b32ce120cce51545722ed403cebd5b626383",
+      "src": "https://github.com/jackson-lafrance/vimgentic",
+      "version": "'8a72b32ce120cce51545722ed403cebd5b626383'"
     }
   }
 }

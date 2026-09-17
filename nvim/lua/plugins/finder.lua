@@ -12,6 +12,13 @@ fzf.setup({
   ui_select = {},
   files = {
     hidden = true,
+    file_ignore_patterns = { "%.rbi$" },
+  },
+  grep = {
+    file_ignore_patterns = { "%.rbi$" },
+  },
+  oldfiles = {
+    file_ignore_patterns = { "%.rbi$" },
   },
 })
 

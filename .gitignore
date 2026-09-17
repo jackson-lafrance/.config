@@ -1,6 +1,8 @@
 *
 !.gitignore
 !README.md
+!bin/
+!bin/**
 !nvim/
 !zsh/
 !tmux/
