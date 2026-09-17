@@ -37,6 +37,19 @@ vim.api.nvim_create_autocmd("FileType", {
 require("oil").setup()
 map("n", "<leader>e", ":Oil<CR>", { desc = "Open file explorer" })
 
+-- Copy the full path of the current buffer.
+vim.api.nvim_create_user_command("CopyName", function()
+  local path = vim.fn.expand("%:p")
+  if path == "" then
+    vim.notify("CopyName: no file in this buffer", vim.log.levels.WARN)
+    return
+  end
+  vim.fn.setreg("+", path)
+  vim.fn.setreg('"', path)
+  vim.notify("Copied: " .. path)
+end, { desc = "Copy full path of current buffer" })
+map("n", "<leader>cn", "<cmd>CopyName<cr>", { desc = "Copy filename" })
+
 require("plugins.lsp")
 require("plugins.finder")
 require("plugins.git")

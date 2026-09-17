@@ -3,7 +3,7 @@
   "statePath": "~/.local/state/river-ci-watch/state.json",
   "agent": {
     "cwd": "~/world/trees/root/src/areas/core/shopify",
-    "command": "pi",
+    "command": "pi-launch",
     "tools": ["read", "bash", "edit", "write", "grep", "find", "ls"],
     "thinking": "medium",
     "maxConcurrent": 1

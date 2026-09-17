@@ -20,7 +20,6 @@ opt.termguicolors = true
 opt.winborder = "rounded"
 
 opt.guicursor = ""
-opt.mouse = ""
 
 opt.swapfile = false
 opt.undofile = true
