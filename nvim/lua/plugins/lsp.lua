@@ -17,6 +17,33 @@ require("mason-lspconfig").setup({
   },
 })
 
+-- C / C++ -----------------------------------------------------------------
+--
+-- Clangd reads compiler flags from the project. Do not set a global C++
+-- standard or include path here: each project has its own build settings.
+
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup("my.clangd", {}),
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if not client or client.name ~= "clangd" then
+      return
+    end
+
+    map("n", "<leader>ch", "<cmd>LspClangdSwitchSourceHeader<cr>", {
+      buffer = args.buf,
+      desc = "Switch C/C++ source/header",
+    })
+
+    if client:supports_method("textDocument/inlayHint") then
+      map("n", "<leader>ci", function()
+        local filter = { bufnr = args.buf }
+        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled(filter), filter)
+      end, { buffer = args.buf, desc = "Toggle C/C++ inlay hints" })
+    end
+  end,
+})
+
 -- Ruby --------------------------------------------------------------------
 --
 -- Ruby tools run inside the project's Ruby environment, picked per root:
