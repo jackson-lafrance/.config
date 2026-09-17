@@ -110,6 +110,35 @@ keep their old config until restarted; restarting Sho Pi CI can retry failed age
 Plugins are added with `vim.pack` in `nvim/lua/plugins/*.lua`. `:PackClean`
 deletes plugins on disk that the config no longer adds.
 
+### C / C++
+
+Clangd supplies completion, diagnostics, navigation, and formatting. Install it
+with `:MasonInstall clangd` on machines that lack it; Mason enables it
+through the existing LSP setup. No separate completion or formatting plugin
+is needed.
+
+Compiler settings belong in the project, not in Neovim's global config. Use
+`compile_commands.json` from the build when available. For a small C++-only
+project without that database, such as Relasaurus, put `compile_flags.txt`
+beside `include/` and `src/`:
+
+```text
+-xc++
+-std=c++20
+-Iinclude
+```
+
+`-xc++` also makes clangd parse standalone `.h` files as C++, rather than C.
+`-Iinclude` adds the project's header directory, so source files can use
+`#include "algebra.h"` instead of `#include "../include/algebra.h"`. These flags
+configure clangd; they do not change the terminal build. Match the flags to
+each project's actual build settings.
+
+Restart Neovim after adding the project settings. `<leader>li` shows the
+attached servers. `<leader>lf` formats through clangd and does not need the
+standalone `clang-format` executable. Inlay hints stay off unless toggled
+for a buffer with `<leader>ci`.
+
 ### Ruby LSP and Sorbet
 
 `ruby_lsp` starts for every Ruby buffer; `sorbet` starts too when the root has
@@ -175,6 +204,12 @@ LSP. Neovim defaults stay: `K` hover, `grn` rename, `[d`/`]d` diagnostics,
 | `<leader>lf`  | format buffer                                   |
 | `<leader>li`  | LSP health                                      |
 | `<leader>m`   | Mason                                           |
+| `<leader>ch`  | switch source/header (clangd buffers)            |
+| `<leader>ci`  | toggle type/parameter hints (clangd buffers)     |
+
+Completion: Tab / Shift-Tab select suggestions. Enter accepts a selected
+suggestion; otherwise it starts a new line with autopairs' brace indentation.
+An open completion menu with no selection does not consume the newline.
 
 Git (gitsigns + fugitive + fzf-lua).
 

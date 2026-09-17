@@ -22,8 +22,15 @@ vim.keymap.set("i", "<C-l>", function()
 end, { desc = "trigger completion" })
 
 vim.keymap.set("i", "<CR>", function()
-  return pum() and vim.fn.complete_info({ "selected" }).selected ~= 1 and "<C-y>" or "<CR>"
-end, { expr = true, desc = "accept completion" })
+  local autopairs = require("nvim-autopairs")
+  if pum() then
+    if vim.fn.complete_info({ "selected" }).selected >= 0 then
+      return vim.keycode("<C-y>")
+    end
+    return vim.keycode("<C-e>") .. autopairs.autopairs_cr()
+  end
+  return autopairs.autopairs_cr()
+end, { expr = true, replace_keycodes = false, desc = "accept completion or start a new line" })
 
 vim.keymap.set("i", "<Tab>", function()
   return pum() and "<C-n>" or "<Tab>"
