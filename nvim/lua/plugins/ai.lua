@@ -4,7 +4,7 @@ local map = vim.keymap.set
 vim.pack.add({
   {
     src = "https://github.com/jackson-lafrance/vimgentic",
-    version = "8a72b32ce120cce51545722ed403cebd5b626383",
+    version = "891267466c7cb860dadfba5971a3b0df1eb273ab",
   },
 })
 
