@@ -48,7 +48,7 @@ Optional dependencies, all degraded gracefully when missing: `rg`, `fzf`, `eza`,
 `zsh-syntax-highlighting`.
 
 Neovim tools: `fzf`, `rg`, `fd` for the pickers; `ruby-lsp` installed in each
-Ruby you use (`gem install ruby-lsp`); `pi` for the 99 AI provider.
+Ruby you use (`gem install ruby-lsp`); `pi` for Vimgentic.
 
 ## Neovim
 
@@ -186,20 +186,73 @@ Git (gitsigns + fugitive + fzf-lua).
 PR review without checking out: `gh pr diff <n> | nvim -R -c 'set ft=diff'`.
 With a checkout: `gh pr checkout <n>`, then `<leader>gR`.
 
-AI (99 with a pi provider). pi does auth and routing, so the Shopify AI proxy
-is used on the work machine and personal providers at home.
+AI (Vimgentic with pi). `<leader>` is Space. Vimgentic runs the `pi`
+executable from Neovim's PATH and uses pi's configured default model unless
+its model picker overrides it. The plugin revision is pinned in the config
+and lockfile.
+
+Search and review:
 
 | Keymap        | Action                                                    |
 | ------------- | --------------------------------------------------------- |
-| `<leader>9s`  | search: ask a question about the project, answers land in the quickfix list |
-| `<leader>9v`  | visual: rewrite the selection with a prompt                |
-| `<leader>9o`  | open the last result again                                 |
-| `<leader>9m`  | pick a model (`pi --list-models`)                          |
-| `<leader>9x`  | stop all requests                                          |
-| `<leader>9l`  | view 99 logs                                               |
+| `<leader>9s`  | search the project; results open in quickfix                |
+| `<leader>9o`  | reopen the last search results                             |
+| `<leader>9r`  | start a local review (normal or visual mode)                |
+| `<leader>9R`  | open the latest completed review for this project           |
 
-`@file` completion in the 99 prompt is off (it scans the git root, 1.7M paths
-in World). Write the path in the prompt; pi reads files itself.
+Guided tours:
+
+| Keymap        | Action                                                    |
+| ------------- | --------------------------------------------------------- |
+| `<leader>9t`  | request a code tour (normal or visual mode)                 |
+| `<leader>9g`  | open the latest completed tour for this project             |
+| `<leader>9j`  | next tour stop                                             |
+| `<leader>9k`  | previous tour stop                                         |
+
+Rewrites and explanations:
+
+| Keymap        | Action                                                    |
+| ------------- | --------------------------------------------------------- |
+| `<leader>9v`  | visual: request a replacement; normal: preview it           |
+| `<leader>9p`  | draft an explanation or next-change request (normal/visual) |
+| `<leader>9e`  | draft an explanation of the diagnostic at the cursor        |
+
+Chat:
+
+| Keymap        | Action                                                    |
+| ------------- | --------------------------------------------------------- |
+| `<leader>9c`  | normal: open/focus chat or editor; visual: paste selection   |
+| `<leader>9C`  | hide chat without stopping pi                              |
+| `<leader>9T`  | same terminal sidebar action as normal-mode `<leader>9c`   |
+
+History and controls:
+
+| Keymap        | Action                                                    |
+| ------------- | --------------------------------------------------------- |
+| `<leader>9h`  | open session history                                       |
+| `<leader>9m`  | pick a persistent model for each operation                  |
+| `<leader>9x`  | abort background requests and interrupt chat                |
+| `<leader>9l`  | view Vimgentic logs                                        |
+
+Submit search, review, tour, and rewrite prompts with `:w`. Completed reviews,
+tours, and replacements do not take focus; open them with `9R`, `9g`, or
+normal-mode `9v` after Space. In a replacement preview, Enter accepts and
+`q`/Escape discards. Acceptance changes the buffer; save the file separately.
+
+Pair actions, diagnostic explanations, and selections paste editable chat
+drafts without submitting them. Press Enter in pi to submit. Pairing guidance
+is enabled for Vimgentic chat sessions. In chat, Escape enters terminal-normal
+mode; `i` returns to typing and `q` hides the sidebar. The sidebar's local
+`<leader>9x` only interrupts chat; `:VimgenticAbortAll` also stops background
+requests.
+
+Tours use Left/Right in normal mode and Escape to exit. Review reports use
+Enter to jump, `]t`/`[t` to navigate, `gq` for quickfix, and `q` to close.
+History uses Ctrl-r to reopen saved reviews or tours after a restart.
+
+Additional commands without shortcuts: `:VimgenticReviewQuickfix` opens review
+findings in quickfix, and `:VimgenticTourClose` exits the tour. Type
+`:Vimgentic` and press Tab to browse the commands.
 
 ## Not tracked
 
