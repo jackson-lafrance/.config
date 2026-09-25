@@ -205,7 +205,7 @@ Guided tours:
 | Keymap        | Action                                                    |
 | ------------- | --------------------------------------------------------- |
 | `<leader>9t`  | request a code tour (normal or visual mode)                 |
-| `<leader>9g`  | open the latest completed tour for this project             |
+| `<leader>9g`  | restore this project's latest tour, or open the tour picker |
 | `<leader>9j`  | next tour stop                                             |
 | `<leader>9k`  | previous tour stop                                         |
 
@@ -223,6 +223,7 @@ Chat:
 | ------------- | --------------------------------------------------------- |
 | `<leader>9c`  | normal: open/focus chat or editor; visual: paste selection   |
 | `<leader>9C`  | hide chat without stopping pi                              |
+| `<leader>9n`  | start a new chat; confirm before replacing the current chat |
 | `<leader>9T`  | same terminal sidebar action as normal-mode `<leader>9c`   |
 
 History and controls:
@@ -230,7 +231,7 @@ History and controls:
 | Keymap        | Action                                                    |
 | ------------- | --------------------------------------------------------- |
 | `<leader>9h`  | open session history                                       |
-| `<leader>9m`  | pick a persistent model for each operation                  |
+| `<leader>9m`  | pick a persistent model and thinking level per operation    |
 | `<leader>9x`  | abort background requests and interrupt chat                |
 | `<leader>9l`  | view Vimgentic logs                                        |
 
@@ -246,9 +247,28 @@ mode; `i` returns to typing and `q` hides the sidebar. The sidebar's local
 `<leader>9x` only interrupts chat; `:VimgenticAbortAll` also stops background
 requests.
 
-Tours use Left/Right in normal mode and Escape to exit. Review reports use
-Enter to jump, `]t`/`[t` to navigate, `gq` for quickfix, and `q` to close.
-History uses Ctrl-r to reopen saved reviews or tours after a restart.
+Normal-mode `9c` reuses the existing chat even after you change directories.
+Use `9n` for a fresh chat in the editor's current directory. Replacement stops
+work and discards unsent input, so it asks first. Escape cancels the menu
+without leaving a pending chat switch. Saved conversations remain in history.
+
+The model picker asks for the operation, model, and thinking level. It shows
+only that model's supported levels. Higher thinking can take longer and use
+more tokens. `(pi default)` leaves the corresponding choice to Pi. Leave Pi's
+input empty before changing a live chat's model.
+
+Tours use Left/Right in normal mode and Escape to exit. `9g` restores a saved
+tour after a restart; with no tour for this directory, it opens the tour
+picker. A missing file still shows its explanation and allows the next step.
+New tours request focused steps with inputs, a walkthrough, decisions and
+effects, and the next transition. Use `9t` to regenerate sparse explanations;
+saved tours keep their original text.
+
+Review reports use Enter to jump, `]t`/`[t` to navigate, `gq` for quickfix,
+and `q` to close. History's Enter opens each session as its original kind:
+review, tour, search, or chat. Ctrl-o explicitly resumes any session in chat.
+Ctrl-r also opens saved reviews and tours, even after a later chat follow-up.
+An empty history still opens so Ctrl-p can show other projects.
 
 Additional commands without shortcuts: `:VimgenticReviewQuickfix` opens review
 findings in quickfix, and `:VimgenticTourClose` exits the tour. Type
