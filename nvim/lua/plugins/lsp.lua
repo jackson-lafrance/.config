@@ -91,6 +91,13 @@ end
 
 vim.lsp.config("ruby_lsp", {
   cmd = ruby_server_cmd("ruby-lsp", { "ruby-lsp" }, "gem install ruby-lsp"),
+  init_options = {
+    addonSettings = {
+      ["Ruby LSP Rails"] = {
+        enablePendingMigrationsPrompt = false,
+      },
+    },
+  },
   root_dir = function(bufnr, on_dir)
     local root = ruby_root(bufnr)
     if root then
