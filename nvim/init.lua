@@ -10,6 +10,15 @@ opt.smartcase = true
 
 opt.wrap = false
 
+-- Quickfix and location-list entries can be long; wrap them only in those windows.
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "qf",
+  callback = function()
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+  end,
+})
+
 opt.tabstop = 2
 opt.shiftwidth = 2
 opt.expandtab = true
