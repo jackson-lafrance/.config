@@ -20,6 +20,8 @@ path_prepend "$PNPM_HOME"
 alias vim='nvim'
 alias claude='claude --dangerously-skip-permissions'
 
+export EDITOR=vim
+
 export JUNIT_JAR="$HOME/lib/junit-platform-console-standalone.jar"
 alias jcompile='javac -cp ".:$JUNIT_JAR" *.java ods/*.java'
 jtest() {
