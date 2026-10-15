@@ -205,11 +205,17 @@ the current line.
 
 Git (gitsigns + fugitive + fzf-lua).
 
+Git signs include untracked files and have room beside diagnostics.
+`<leader>to` previews the current hunk, or jumps to the next staged/unstaged
+hunk (with wraparound). It reports `No hunks` when there are none.
+The inline preview closes when you move or enter insert mode; it is not a
+whole-file overlay toggle.
+
 | Keymap        | Action                                                    |
 | ------------- | --------------------------------------------------------- |
 | `]c` / `[c`   | next / previous hunk (in a diff window: next/prev change) |
 | `<leader>hp`  | preview hunk in a float                                   |
-| `<leader>to`  | preview hunk inline                                       |
+| `<leader>to`  | preview current or next hunk inline                       |
 | `<leader>hs`  | stage or unstage hunk (visual: the selection)             |
 | `<leader>hr`  | reset hunk (visual: the selection)                        |
 | `<leader>hS`  | stage buffer                                              |
@@ -235,8 +241,8 @@ With a checkout: `gh pr checkout <n>`, then `<leader>gR`.
 
 AI (Vimgentic with pi). `<leader>` is Space. Vimgentic runs the `pi`
 executable from Neovim's PATH and uses pi's configured default model unless
-its model picker overrides it. The plugin revision is pinned in the config
-and lockfile.
+its model picker overrides it. The config tracks Vimgentic's `main` branch;
+the lockfile records the installed revision.
 
 Search and review:
 
@@ -271,6 +277,7 @@ Chat:
 | `<leader>9c`  | normal: open/focus chat or editor; visual: paste selection   |
 | `<leader>9C`  | hide chat without stopping pi                              |
 | `<leader>9n`  | start a new chat; confirm before replacing the current chat |
+| `<leader>9f`  | toggle agent-chosen file navigation (off by default)         |
 | `<leader>9T`  | same terminal sidebar action as normal-mode `<leader>9c`   |
 
 History and controls:
@@ -298,6 +305,18 @@ Normal-mode `9c` reuses the existing chat even after you change directories.
 Use `9n` for a fresh chat in the editor's current directory. Replacement stops
 work and discards unsent input, so it asks first. Escape cancels the menu
 without leaving a pending chat switch. Saved conversations remain in history.
+
+Use `<leader>9f` to let Pi choose which files to show beside chat after reads,
+edits, and writes. Follow mode starts off. It keeps keyboard focus where it is
+and skips navigation if the current or target buffer has unsaved changes.
+Hiding chat pauses follow. In chat, press Escape before the shortcut. Restart
+Neovim and the chat process once after this update to load the new extension.
+
+Each actual follow jump enters a list for that prompt. When Pi finishes,
+quickfix shows the file, line, and why Pi chose to show it. Press Enter on an
+entry to revisit it. The list keeps jump order, including repeated files.
+It excludes skipped requests and preserves keyboard focus. If follow is off,
+chat is hidden, or another tab is active, use `:copen` to see the completed list.
 
 The model picker asks for the operation, model, and thinking level. It shows
 only that model's supported levels. Higher thinking can take longer and use

@@ -86,23 +86,40 @@ end
 
 local warned_roots = {}
 
-local function ruby_server_cmd(tool, argv, install_hint)
+local function ruby_tool_available(root, tool, probe_argv, install_argv)
+  local ok, probe = pcall(function()
+    return vim.system(ruby_cmd(root, probe_argv), { cwd = root, text = true }):wait(5000)
+  end)
+  local key = root .. tool
+  if ok and probe.code == 0 then
+    warned_roots[key] = nil
+    return true
+  end
+  if not warned_roots[key] then
+    warned_roots[key] = true
+    local detail = ok and vim.trim(probe.stderr or "") or tostring(probe)
+    local install = table.concat(vim.tbl_map(vim.fn.shellescape, ruby_cmd(root, install_argv)), " ")
+    vim.notify(
+      string.format("%s is unavailable for %s.\n%s\nInstall: cd %s && %s", tool, root, detail, vim.fn.shellescape(root), install),
+      vim.log.levels.WARN
+    )
+  end
+  return false
+end
+
+local function ruby_server_cmd(argv)
   return function(dispatchers, config)
     local root = assert(config.root_dir)
-    local probe = vim.system(ruby_cmd(root, { "sh", "-c", "command -v " .. tool }), { cwd = root }):wait()
-    if probe.code ~= 0 and not warned_roots[root .. tool] then
-      warned_roots[root .. tool] = true
-      vim.notify(
-        string.format("%s is not installed for %s.\nFix: cd %s && %s", tool, root, root, install_hint),
-        vim.log.levels.WARN
-      )
-    end
     return vim.lsp.rpc.start(ruby_cmd(root, argv), dispatchers, { cwd = root })
   end
 end
 
+-- Resolve the gem through the project's Ruby, not a PATH wrapper that can
+-- replace Ruby and GEM_HOME (such as Homebrew's ruby-lsp executable).
+local ruby_lsp_executable = "Gem.bin_path('ruby-lsp', 'ruby-lsp')"
+
 vim.lsp.config("ruby_lsp", {
-  cmd = ruby_server_cmd("ruby-lsp", { "ruby-lsp" }, "gem install ruby-lsp"),
+  cmd = ruby_server_cmd({ "ruby", "-e", "load " .. ruby_lsp_executable }),
   init_options = {
     addonSettings = {
       ["Ruby LSP Rails"] = {
@@ -112,17 +129,21 @@ vim.lsp.config("ruby_lsp", {
   },
   root_dir = function(bufnr, on_dir)
     local root = ruby_root(bufnr)
-    if root then
+    if root and ruby_tool_available(root, "ruby-lsp", {
+      "ruby", "-e", ruby_lsp_executable,
+    }, { "gem", "install", "ruby-lsp", "ruby-lsp-rails" }) then
       on_dir(root)
     end
   end,
 })
 
 vim.lsp.config("sorbet", {
-  cmd = ruby_server_cmd("bundle", { "bundle", "exec", "srb", "tc", "--lsp" }, "bundle install"),
+  cmd = ruby_server_cmd({ "bundle", "exec", "srb", "tc", "--lsp" }),
   root_dir = function(bufnr, on_dir)
     local root = ruby_root(bufnr)
-    if root and vim.uv.fs_stat(root .. "/sorbet/config") then
+    if root and vim.uv.fs_stat(root .. "/sorbet/config") and ruby_tool_available(root, "bundle", {
+      "sh", "-c", "command -v bundle",
+    }, { "bundle", "install" }) then
       on_dir(root)
     end
   end,

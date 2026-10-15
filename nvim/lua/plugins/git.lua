@@ -7,6 +7,9 @@ vim.pack.add({
 })
 
 require("gitsigns").setup({
+  attach_to_untracked = true,
+  -- Keep one Git sign visible even when multiple language servers report errors.
+  sign_priority = 20,
   on_attach = function(bufnr)
     local gs = require("gitsigns")
     local function bmap(mode, lhs, rhs, desc)
@@ -29,7 +32,27 @@ require("gitsigns").setup({
     end, "Previous hunk")
 
     bmap("n", "<leader>hp", gs.preview_hunk, "Preview hunk (float)")
-    bmap("n", "<leader>to", gs.preview_hunk_inline, "Preview hunk inline")
+    bmap("n", "<leader>to", function()
+      local actions = gs.get_actions()
+      if not actions then
+        vim.notify("Gitsigns is not attached to this buffer", vim.log.levels.WARN)
+        return
+      end
+      if actions.preview_hunk then
+        gs.preview_hunk_inline()
+        return
+      end
+
+      -- Preview the next staged or unstaged hunk when the cursor is on context.
+      local win = vim.api.nvim_get_current_win()
+      gs.nav_hunk("next", { target = "all", wrap = true, navigation_message = true }, function(err)
+        if err then
+          vim.notify(err, vim.log.levels.ERROR)
+        elseif vim.api.nvim_get_current_win() == win and vim.api.nvim_get_current_buf() == bufnr then
+          gs.preview_hunk_inline()
+        end
+      end)
+    end, "Preview current or next hunk inline")
     bmap("n", "<leader>hs", gs.stage_hunk, "Stage/unstage hunk")
     bmap("n", "<leader>hr", gs.reset_hunk, "Reset hunk")
     bmap("x", "<leader>hs", function() gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, "Stage selection")

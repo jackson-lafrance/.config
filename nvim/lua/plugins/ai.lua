@@ -4,7 +4,7 @@ local map = vim.keymap.set
 vim.pack.add({
   {
     src = "https://github.com/jackson-lafrance/vimgentic",
-    version = "b4a1eb7a8ad4afa8139b7b390435fd4aacf9f6b0",
+    version = "main",
   },
 })
 
@@ -36,6 +36,7 @@ map("n", "<leader>9c", vimgentic.chat_toggle, { desc = "Vimgentic: focus termina
 map("x", "<leader>9c", vimgentic.chat_selection, { desc = "Vimgentic: send selection to terminal" })
 map("n", "<leader>9C", vimgentic.chat_close, { desc = "Vimgentic: hide terminal" })
 map("n", "<leader>9n", vimgentic.chat_new, { desc = "Vimgentic: start new chat" })
+map("n", "<leader>9f", vimgentic.chat_follow_toggle, { desc = "Vimgentic: toggle follow Pi" })
 map("n", "<leader>9h", vimgentic.history, { desc = "Vimgentic: session history" })
 map("n", "<leader>9o", vimgentic.reopen, { desc = "Vimgentic: reopen last search" })
 map("n", "<leader>9x", vimgentic.abort_all, { desc = "Vimgentic: abort all requests" })

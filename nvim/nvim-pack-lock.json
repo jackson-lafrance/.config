@@ -64,9 +64,9 @@
       "src": "https://github.com/tpope/vim-fugitive"
     },
     "vimgentic": {
-      "rev": "b4a1eb7a8ad4afa8139b7b390435fd4aacf9f6b0",
+      "rev": "28254144ada52b11daac31c31a41fd5f90e72add",
       "src": "https://github.com/jackson-lafrance/vimgentic",
-      "version": "'b4a1eb7a8ad4afa8139b7b390435fd4aacf9f6b0'"
+      "version": "'main'"
     }
   }
 }

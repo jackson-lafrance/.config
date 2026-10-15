@@ -3,7 +3,8 @@ vim.g.mapleader = " "
 
 opt.number = true
 opt.relativenumber = true
-opt.signcolumn = "yes"
+-- Keep Git signs visible beside diagnostics without shifting the text.
+opt.signcolumn = "yes:2"
 
 opt.ignorecase = true
 opt.smartcase = true
