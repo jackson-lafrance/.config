@@ -6,7 +6,6 @@ vim.pack.add({
   "https://github.com/tpope/vim-fugitive",
 })
 
--- gitsigns: hunks in the sign column, hunk navigation, blame.
 require("gitsigns").setup({
   on_attach = function(bufnr)
     local gs = require("gitsigns")
@@ -46,7 +45,6 @@ require("gitsigns").setup({
   end,
 })
 
--- fugitive: status, diffs against index/branch, file history.
 local function default_branch()
   local ref = vim.fn.systemlist("git symbolic-ref -q --short refs/remotes/origin/HEAD")[1]
   return (vim.v.shell_error == 0 and ref) or "origin/main"
@@ -58,7 +56,6 @@ map("n", "<leader>gD", function()
   vim.cmd("Gdiffsplit " .. default_branch())
 end, { desc = "Diff file against default branch" })
 map("n", "<leader>gR", function()
-  -- Every file changed since the merge-base with the default branch, one tab each.
   vim.cmd("Git difftool -y " .. default_branch() .. "...")
 end, { desc = "Review branch: all changed files vs default branch" })
 map("n", "<leader>gl", ":0Gclog<CR>", { desc = "File history (quickfix)" })

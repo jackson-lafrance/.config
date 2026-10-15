@@ -8,21 +8,16 @@ vim.pack.add({
 local fzf = require("fzf-lua")
 
 fzf.setup({
-  -- Replaces telescope-ui-select: vim.ui.select (code actions, etc.) opens in fzf.
   ui_select = {},
   files = {
     hidden = true,
   },
 })
 
--- Pickers search from Neovim's cwd (start nvim inside the zone/project).
--- The uppercase variants search from the git root: in World that is the whole
--- sparse checkout (~500k files), so use them for cross-zone lookups only.
 local function repo_root()
   return vim.fs.root(0, ".git") or vim.uv.cwd()
 end
 
--- Directory of the current buffer; in Oil, the directory being browsed.
 local function buffer_dir()
   if vim.bo.filetype == "oil" then
     return require("oil").get_current_dir()

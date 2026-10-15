@@ -41,26 +41,42 @@ ln -s ~/.config/zsh/.zshrc ~/.zshrc
 ln -s ~/.config/tmux/tmux.conf ~/.tmux.conf   # optional; tmux 3.1+ reads XDG
 ```
 
-Neovim needs no bootstrapping: `vim.pack` installs plugins on first launch and
-`nvim/nvim-pack-lock.json` pins them.
+Neovim targets the stable 0.12.x release line. `vim.pack` installs plugins on
+first launch and `nvim/nvim-pack-lock.json` pins them. Treesitter parsers are a
+deliberate one-time bootstrap: install `tree-sitter-cli`, open Neovim, and run
+`:TSInstallConfigured`. Run `:TSUpdate` after updating nvim-treesitter.
 
 Optional dependencies, all degraded gracefully when missing: `rg`, `fzf`, `eza`,
 `zsh-syntax-highlighting`.
 
-Neovim tools: `fzf`, `rg`, `fd` for the pickers; `ruby-lsp` installed in each
-Ruby you use (`gem install ruby-lsp`); `pi` for Vimgentic.
+Neovim tools: `fzf`, `rg`, `fd` for the pickers; `prettierd` or `prettier` for
+web formatting; `ruby-lsp` installed in each Ruby you use (`gem install
+ruby-lsp`); `pi` for Vimgentic.
 
 ## Neovim
 
-Plugins are added with `vim.pack` in `nvim/lua/plugins/*.lua`. `:PackClean`
-deletes plugins on disk that the config no longer adds.
+Plugins are added with `vim.pack` in `nvim/lua/plugins/*.lua`. The lockfile is
+the reproducible baseline; updating it is a separate, reviewed operation.
+
+| Command | Action |
+| ------- | ------ |
+| `:PackSync` | review restoring on-disk plugins to the committed lockfile |
+| `:PackUpdate` | review updates from each plugin's configured source/version |
+| `:PackClean` | list inactive plugin checkouts without deleting them |
+| `:PackClean!` | delete the previously reviewed inactive checkouts |
+| `:TSInstallConfigured` | install the parser set used by this config |
+| `:TSUpdate` | rebuild/update installed parsers after a Treesitter update |
+
+Blink, Conform, and Quicker are pinned to release tags in their plugin modules;
+the lockfile pins exact commits for every plugin.
 
 ### C / C++
 
-Clangd supplies completion, diagnostics, navigation, and formatting. Install it
-with `:MasonInstall clangd` on machines that lack it; Mason enables it
-through the existing LSP setup. No separate completion or formatting plugin
-is needed.
+Clangd supplies C/C++ language knowledge: completion data, diagnostics,
+navigation, and formatting. Blink presents its completion results, and Conform
+delegates formatting to clangd when no external formatter is configured.
+Install clangd with `:MasonInstall clangd` on machines that lack it; Mason
+enables it through the existing LSP setup.
 
 Compiler settings belong in the project, not in Neovim's global config. Use
 `compile_commands.json` from the build when available. For a small C++-only
@@ -79,9 +95,10 @@ beside `include/` and `src/`:
 configure clangd; they do not change the terminal build. Match the flags to
 each project's actual build settings.
 
-Restart Neovim after adding the project settings. `<leader>li` shows the
-attached servers. `<leader>lf` formats through clangd and does not need the
-standalone `clang-format` executable. Inlay hints stay off unless toggled
+Restart Neovim after adding the project settings. Neovim warns once per clangd
+project when none of these metadata files exists. `<leader>li` shows the
+attached servers. `<leader>lf` reaches clangd through Conform and does not need
+the standalone `clang-format` executable. Inlay hints stay off unless toggled
 for a buffer with `<leader>ci`.
 
 ### Ruby LSP and Sorbet
@@ -120,7 +137,8 @@ sparse checkout).
 | `<leader>fr`  | resume the last picker                          |
 | `<leader>fb`  | buffers                                         |
 | `<leader>fo`  | recent files                                    |
-| `<leader>fq`  | quickfix list (picker; `:copen` shows full text) |
+| `<leader>fq`  | quickfix list as an fzf picker                  |
+| `<leader>q`   | toggle and focus the full enhanced quickfix list |
 | `<leader>fs`  | LSP workspace symbols (live)                    |
 | `<leader>fh`  | help tags                                       |
 | `<leader>fk`  | keymaps                                         |
@@ -134,6 +152,11 @@ Inside a picker: `alt-h` toggles hidden files, `alt-i` toggles ignored files,
 `alt-a` selects all, `alt-q` sends the selection to the quickfix list,
 `ctrl-s`/`ctrl-v`/`ctrl-t` open in a split/vsplit/tab.
 
+In the full quickfix window, `>` adds two context lines around each result and
+`<` collapses them. The result text is editable: `:write` applies changed lines
+to the source buffers. Those source buffers remain modified, so inspect and
+save them normally rather than having Quicker write project files implicitly.
+
 LSP. Neovim defaults stay: `K` hover, `grn` rename, `[d`/`]d` diagnostics,
 `<C-]>` definition via tags, `<C-s>` signature help in insert mode.
 
@@ -146,15 +169,39 @@ LSP. Neovim defaults stay: `K` hover, `grn` rename, `[d`/`]d` diagnostics,
 | `gO`          | document symbols                                |
 | `gra`         | code actions (with diff preview)                |
 | `<leader>bb`  | diagnostics for the current line                |
-| `<leader>lf`  | format buffer                                   |
+| `<leader>lf`  | format buffer, or the visual selection           |
 | `<leader>li`  | LSP health                                      |
 | `<leader>m`   | Mason                                           |
 | `<leader>ch`  | switch source/header (clangd buffers)            |
 | `<leader>ci`  | toggle type/parameter hints (clangd buffers)     |
 
-Completion: Tab / Shift-Tab select suggestions. Enter accepts a selected
-suggestion; otherwise it starts a new line with autopairs' brace indentation.
-An open completion menu with no selection does not consume the newline.
+Completion is provided by Blink. Suggestions begin unselected; Tab / Shift-Tab
+cycle them and insert the current selection directly into the buffer. Ordinary
+word completion does not require Enter: continue typing to keep the selection.
+Enter explicitly commits a selected item, which is useful for an LSP function
+snippet whose argument placeholders should remain active; subsequent Tab /
+Shift-Tab presses move through those placeholders. With no selected item,
+Enter falls through to autopairs' newline and brace indentation. `<C-l>` or
+`<C-Space>` opens completion manually, `<C-e>` cancels the current selection,
+and `<C-k>` toggles signature help. `<C-n>` / `<C-p>` cycle completion items
+when those keys reach Neovim. When signature help contains multiple overloads,
+`Option-n` / `Option-p` (`Alt-n` / `Alt-p`) select the next / previous overload.
+These avoid Alacritty's `<C-n>` new-tab binding. The menu labels each source.
+Buffer-word fallback is available for most filetypes but deliberately disabled
+for Ruby, where it previously obscured language-server results.
+
+Formatting is manual-only. `<leader>lf` runs the first available
+`prettierd`/`prettier` for web filetypes; install it on a new machine with
+`:MasonInstall prettierd`. Other languages fall back to their attached LSP,
+such as clangd, lua_ls, or project Ruby LSP. `:ConformInfo` shows exactly which
+formatter will run and where its error log lives. Mason's global RuboCop LSP is
+excluded so it cannot compete with project Ruby LSP.
+
+Diagnostic signs, underlines, and virtual lines are hidden and do not update
+during Insert mode. They return with the latest results on InsertLeave, showing
+virtual lines only at the cursor and sorted by severity. `[d` and `]d` move
+between diagnostics and open their float; `<leader>bb` opens all messages for
+the current line.
 
 Git (gitsigns + fugitive + fzf-lua).
 

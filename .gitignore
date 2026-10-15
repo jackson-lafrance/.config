@@ -54,6 +54,7 @@ shadowenv/
 uv/
 nvim/.claude/
 nvim/.ruby-lsp/
+nvim/**/.pi-precognition/
 zsh/*.local.zsh
 zsh/.*.local.zsh
 tmux/*.local.conf

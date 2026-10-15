@@ -9,18 +9,27 @@ vim.pack.add({
 
 require("mason").setup()
 
+vim.lsp.config("clangd", {
+  cmd = { "clangd", "--log=error" },
+})
+
 require("mason-lspconfig").setup({
   automatic_enable = {
-    -- Ruby servers run from the project's own Ruby (shadowenv or rbenv), never
-    -- from Mason. Mason stays useful for every other language server.
-    exclude = { "ruby_lsp", "sorbet", "shopify_theme_ls" },
+    exclude = { "rubocop", "ruby_lsp", "sorbet", "shopify_theme_ls" },
   },
 })
 
--- C / C++ -----------------------------------------------------------------
---
--- Clangd reads compiler flags from the project. Do not set a global C++
--- standard or include path here: each project has its own build settings.
+local warned_clangd_roots = {}
+local clangd_metadata = { ".clangd", "compile_commands.json", "compile_flags.txt" }
+
+local function has_clangd_metadata(root)
+  for _, filename in ipairs(clangd_metadata) do
+    if vim.uv.fs_stat(vim.fs.joinpath(root, filename)) then
+      return true
+    end
+  end
+  return false
+end
 
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("my.clangd", {}),
@@ -28,6 +37,19 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local client = vim.lsp.get_client_by_id(args.data.client_id)
     if not client or client.name ~= "clangd" then
       return
+    end
+
+    local root = client.root_dir
+    if root and not warned_clangd_roots[root] and not has_clangd_metadata(root) then
+      warned_clangd_roots[root] = true
+      vim.notify(
+        string.format(
+          "clangd is using fallback compiler flags for %s.\nAdd compile_commands.json, compile_flags.txt, or .clangd for accurate completion and diagnostics.",
+          vim.fn.fnamemodify(root, ":~")
+        ),
+        vim.log.levels.WARN,
+        { title = "clangd project metadata" }
+      )
     end
 
     map("n", "<leader>ch", "<cmd>LspClangdSwitchSourceHeader<cr>", {
@@ -43,16 +65,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end
   end,
 })
-
--- Ruby --------------------------------------------------------------------
---
--- Ruby tools run inside the project's Ruby environment, picked per root:
---   <root>/.shadowenv.d  -> shadowenv exec --dir <root> -- <tool>   (Shopify dev / World zones)
---   <root>/.ruby-version -> rbenv exec <tool>                        (rbenv at home)
---   otherwise            -> <tool> from PATH
---
--- The root is the nearest `.shadowenv.d` (the World zone, even for nested gems),
--- else the nearest Gemfile or .git.
 
 local function ruby_env_prefix(root)
   if vim.fn.executable("shadowenv") == 1 and vim.uv.fs_stat(root .. "/.shadowenv.d") then
@@ -115,8 +127,6 @@ vim.lsp.config("sorbet", {
     end
   end,
   handlers = {
-    -- Sorbet reports long operations (Indexing, SlowPath typechecking) here.
-    -- Hover and diagnostics wait until Indexing ends, so say when that is.
     ["sorbet/showOperation"] = function(_, params)
       vim.g.sorbet_status = params.status == "start" and params.description or ""
       if params.operationName == "Indexing" then
@@ -129,17 +139,12 @@ vim.lsp.config("sorbet", {
 vim.lsp.enable({ "ruby_lsp", "sorbet" })
 
 map("n", "gd", function() require("fzf-lua").lsp_definitions() end, { desc = "LSP definitions" })
-map("n", "gtr", function() require("fzf-lua").lsp_references() end, { desc = "LSP references" })
-map("n", "gti", function() require("fzf-lua").lsp_implementations() end, { desc = "LSP implementations" })
-map("n", "gtt", function() require("fzf-lua").lsp_typedefs() end, { desc = "LSP type definitions" })
+map("n", "grr", function() require("fzf-lua").lsp_references() end, { desc = "LSP references" })
+map("n", "gri", function() require("fzf-lua").lsp_implementations() end, { desc = "LSP implementations" })
+map("n", "grt", function() require("fzf-lua").lsp_typedefs() end, { desc = "LSP type definitions" })
 map("n", "gO", function() require("fzf-lua").lsp_document_symbols() end, { desc = "LSP document symbols" })
 map({ "n", "x" }, "gra", function() require("fzf-lua").lsp_code_actions() end, { desc = "LSP code actions" })
 map("n", "<leader>fs", function() require("fzf-lua").lsp_live_workspace_symbols() end, { desc = "LSP workspace symbols" })
 
 map("n", "<leader>m", ":Mason<CR>", { desc = "Opens mason" })
-map("n", "<leader>lf", function()
-  -- Ruby LSP formats with RuboCop. In Core the first run loads RuboCop's config
-  -- and takes several seconds; the default 1s timeout gives up too early.
-  vim.lsp.buf.format({ timeout_ms = 15000 })
-end, { desc = "Formats the current buffer" })
 map("n", "<leader>li", ":checkhealth vim.lsp<CR>", { desc = "LSP status" })
