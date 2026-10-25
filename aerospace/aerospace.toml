@@ -10,6 +10,12 @@ default-root-container-orientation = 'auto'
 on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 on-focus-changed = ['move-mouse window-lazy-center']
 
+exec-on-workspace-change = [
+   '/bin/bash',
+   '-c',
+   'exec "$HOME/.config/aerospace/show-workspace-hud.sh" "$AEROSPACE_FOCUSED_WORKSPACE"',
+]
+
 [gaps]
 inner.horizontal = 8
 inner.vertical   = 8
