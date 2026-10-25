@@ -9,16 +9,43 @@ vim.pack.add({
 
 require("mason").setup()
 
+local cpp_standards = { "c++11", "c++14", "c++17", "c++20", "c++23", "c++26" }
+local cpp_standard = "c++17"
+
+local function clangd_fallback_flags()
+  return {
+    "-std=" .. cpp_standard,
+    "-Wall",
+    "-Wextra",
+  }
+end
+
 vim.lsp.config("clangd", {
   cmd = { "clangd", "--log=error", "--function-arg-placeholders=true" },
   init_options = {
-    fallbackFlags = {
-      "-std=c++11",
-      "-Wall",
-      "-Wextra",
-    },
+    fallbackFlags = clangd_fallback_flags(),
   },
 })
+
+map("n", "<leader>cs", function()
+  vim.ui.select(cpp_standards, {
+    prompt = "C++ standard:",
+  }, function(choice)
+    if not choice then
+      return
+    end
+
+    cpp_standard = choice
+    vim.lsp.config("clangd", {
+      init_options = {
+        fallbackFlags = clangd_fallback_flags(),
+      },
+    })
+    vim.lsp.enable("clangd", false)
+    vim.lsp.enable("clangd", true)
+    vim.notify("C++ standard set to " .. cpp_standard .. ".", vim.log.levels.INFO)
+  end)
+end, { desc = "Select C++ standard" })
 
 require("mason-lspconfig").setup({
   automatic_enable = {
