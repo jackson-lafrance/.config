@@ -30,6 +30,7 @@ opt.guicursor = ""
 opt.mouse = "a"
 
 opt.undofile = true
+opt.swapfile = false
 
 opt.diffopt:append({ "vertical", "linematch:60", "algorithm:histogram" })
 

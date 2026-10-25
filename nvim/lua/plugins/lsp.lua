@@ -10,7 +10,14 @@ vim.pack.add({
 require("mason").setup()
 
 vim.lsp.config("clangd", {
-  cmd = { "clangd", "--log=error" },
+  cmd = { "clangd", "--log=error", "--function-arg-placeholders=true" },
+  init_options = {
+    fallbackFlags = {
+      "-std=c++11",
+      "-Wall",
+      "-Wextra",
+    },
+  },
 })
 
 require("mason-lspconfig").setup({
@@ -19,37 +26,12 @@ require("mason-lspconfig").setup({
   },
 })
 
-local warned_clangd_roots = {}
-local clangd_metadata = { ".clangd", "compile_commands.json", "compile_flags.txt" }
-
-local function has_clangd_metadata(root)
-  for _, filename in ipairs(clangd_metadata) do
-    if vim.uv.fs_stat(vim.fs.joinpath(root, filename)) then
-      return true
-    end
-  end
-  return false
-end
-
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("my.clangd", {}),
   callback = function(args)
     local client = vim.lsp.get_client_by_id(args.data.client_id)
     if not client or client.name ~= "clangd" then
       return
-    end
-
-    local root = client.root_dir
-    if root and not warned_clangd_roots[root] and not has_clangd_metadata(root) then
-      warned_clangd_roots[root] = true
-      vim.notify(
-        string.format(
-          "clangd is using fallback compiler flags for %s.\nAdd compile_commands.json, compile_flags.txt, or .clangd for accurate completion and diagnostics.",
-          vim.fn.fnamemodify(root, ":~")
-        ),
-        vim.log.levels.WARN,
-        { title = "clangd project metadata" }
-      )
     end
 
     map("n", "<leader>ch", "<cmd>LspClangdSwitchSourceHeader<cr>", {

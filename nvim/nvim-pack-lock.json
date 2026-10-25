@@ -54,6 +54,10 @@
       "src": "https://github.com/stevearc/conform.nvim",
       "version": "'v9.1.0'"
     },
+    "cppassist.nvim": {
+      "rev": "40d644b2209d3091a64f863b5ee8f179600b4e91",
+      "src": "https://github.com/Kohirus/cppassist.nvim"
+    },
     "cyberdream.nvim": {
       "rev": "642c55ad2225f9f4809905918121b2c6d252ad58",
       "src": "https://github.com/scottmckendry/cyberdream.nvim"
