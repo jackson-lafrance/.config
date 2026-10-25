@@ -5,6 +5,7 @@
 !zsh/
 !tmux/
 !alacritty/
+!aerospace/
 !hypr/
 !quickshell/
 !dunst/
@@ -17,6 +18,7 @@
 !zsh/**
 !tmux/**
 !alacritty/**
+!aerospace/**
 !hypr/**
 !quickshell/**
 !dunst/**

@@ -1,0 +1,72 @@
+start-at-login = true
+auto-reload-config = true
+ 
+enable-normalization-flatten-containers = false
+enable-normalization-opposite-orientation-for-nested-containers = true
+ 
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+ 
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+on-focus-changed = ['move-mouse window-lazy-center']
+
+[gaps]
+inner.horizontal = 8
+inner.vertical   = 8
+outer.left       = 8
+outer.bottom     = 8
+outer.top        = [{ monitor.'^built-in.*$' = 8 }, 8]
+outer.right      = 8
+
+[mode.main.binding]
+alt-t  = [
+   'split opposite',
+   'exec-and-forget open -na "Alacritty"',
+ ]
+alt-shift-t = [
+   'split opposite',
+   'exec-and-forget bash "$HOME/.config/aerospace/open-terminal-here.sh"',
+ ]
+alt-b  = [
+   'split opposite',
+   'exec-and-forget open -na Vivaldi',
+ ]
+alt-s = 'split opposite'
+alt-1 = 'workspace 1'
+alt-2 = 'workspace 2'
+alt-3 = 'workspace 3'
+alt-4 = 'workspace 4'
+alt-5 = 'workspace 5'
+alt-6 = 'workspace 6'
+alt-7 = 'workspace 7'
+alt-8 = 'workspace 8'
+alt-9 = 'workspace 9'
+alt-0 = 'workspace 0'
+alt-f = 'workspace f'
+ 
+alt-shift-1 = 'move-node-to-workspace 1'
+alt-shift-2 = 'move-node-to-workspace 2'
+alt-shift-3 = 'move-node-to-workspace 3'
+alt-shift-4 = 'move-node-to-workspace 4'
+alt-shift-5 = 'move-node-to-workspace 5'
+alt-shift-6 = 'move-node-to-workspace 6'
+alt-shift-7 = 'move-node-to-workspace 7'
+alt-shift-8 = 'move-node-to-workspace 8'
+alt-shift-9 = 'move-node-to-workspace 9'
+alt-shift-0 = 'move-node-to-workspace 0'
+alt-shift-f = 'move-node-to-workspace f'
+ 
+alt-left = 'focus left'
+alt-down = 'focus down'
+alt-up = 'focus up'
+alt-right = 'focus right'
+ 
+alt-shift-left = 'move left'
+alt-shift-down = 'move down'
+alt-shift-up = 'move up'
+alt-shift-right = 'move right'
+
+alt-minus = 'resize smart -50'
+alt-equal = 'resize smart +50'
+ 
+alt-m = 'fullscreen'
