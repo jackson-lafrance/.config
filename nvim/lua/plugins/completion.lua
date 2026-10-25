@@ -108,7 +108,7 @@ blink.setup({
     },
   },
   fuzzy = {
-    implementation = "prefer_rust",
+    implementation = "lua",
   },
   signature = {
     enabled = true,

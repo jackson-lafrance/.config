@@ -59,7 +59,6 @@ require("plugins.format")
 require("plugins.finder")
 require("plugins.quickfix")
 require("plugins.git")
-require("plugins.ai")
 
 -- Package operations are intentionally separate: update from upstream, restore
 -- the committed lockfile, and delete inactive checkouts are different actions.
