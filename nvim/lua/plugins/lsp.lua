@@ -40,6 +40,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
     })
 
     if client:supports_method("textDocument/inlayHint") then
+      vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+
       map("n", "<leader>ci", function()
         local filter = { bufnr = args.buf }
         vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled(filter), filter)
