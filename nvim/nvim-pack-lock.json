@@ -50,6 +50,10 @@
       "src": "https://github.com/stevearc/conform.nvim",
       "version": "'v9.1.0'"
     },
+    "cyberdream.nvim": {
+      "rev": "642c55ad2225f9f4809905918121b2c6d252ad58",
+      "src": "https://github.com/scottmckendry/cyberdream.nvim"
+    },
     "dracula.nvim": {
       "rev": "ae752c13e95fb7c5f58da4b5123cb804ea7568ee",
       "src": "https://github.com/Mofiqul/dracula.nvim"

@@ -2,19 +2,18 @@ local vim = vim
 local map = vim.keymap.set
 
 vim.pack.add({
-  "https://github.com/rose-pine/neovim",
+  "https://github.com/scottmckendry/cyberdream.nvim",
   "https://github.com/nvim-tree/nvim-web-devicons",
 
   "https://github.com/nvim-treesitter/nvim-treesitter",
   "https://github.com/stevearc/oil.nvim",
 })
 
-require("rose-pine").setup({
-  styles = {
-    transparency = true,
-  },
+require("cyberdream").setup({
+  transparent = true,
+  italic_comments = true,
 })
-vim.cmd("colorscheme rose-pine-main")
+vim.cmd("colorscheme cyberdream")
 
 local treesitter = require("nvim-treesitter")
 local configured_parsers = {
