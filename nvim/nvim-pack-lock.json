@@ -263,6 +263,11 @@
       "rev": "6bc3dd1294a22e897f0dcf8dd72b85f350e306bc",
       "src": "https://github.com/kshenoy/vim-signature"
     },
+    "vimgentic": {
+      "rev": "28254144ada52b11daac31c31a41fd5f90e72add",
+      "src": "https://github.com/jackson-lafrance/vimgentic",
+      "version": "'main'"
+    },
     "zen-mode.nvim": {
       "rev": "8564ce6d29ec7554eb9df578efa882d33b3c23a7",
       "src": "https://github.com/folke/zen-mode.nvim"
