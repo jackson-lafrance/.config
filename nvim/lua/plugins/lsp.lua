@@ -121,6 +121,16 @@ end
 local function ruby_server_cmd(argv)
   return function(dispatchers, config)
     local root = assert(config.root_dir)
+    if config.name == "ruby_lsp" then
+      local on_error = dispatchers.on_error
+      dispatchers.on_error = function(code, ...)
+        -- RPC already logs unmatched replies; don't interrupt editing for them.
+        if code == vim.lsp.rpc.client_errors.NO_RESULT_CALLBACK_FOUND then
+          return
+        end
+        return on_error(code, ...)
+      end
+    end
     return vim.lsp.rpc.start(ruby_cmd(root, argv), dispatchers, { cwd = root })
   end
 end
