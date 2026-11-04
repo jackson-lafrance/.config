@@ -53,6 +53,74 @@ require("mason-lspconfig").setup({
   },
 })
 
+local header_extensions = {
+  c = { "h" },
+  cc = { "hh", "h", "hpp", "hxx" },
+  cpp = { "hpp", "h", "hh", "hxx" },
+  cxx = { "hxx", "h", "hpp", "hh" },
+}
+
+local source_extensions = {
+  hh = { "cc", "cpp", "cxx" },
+  hpp = { "cpp", "cc", "cxx" },
+  hxx = { "cxx", "cpp", "cc" },
+}
+
+local function paired_file(bufnr)
+  local path = vim.api.nvim_buf_get_name(bufnr)
+  local base, extension = path:match("^(.*)%.([^. /]+)$")
+  if not base then
+    return nil
+  end
+
+  local extensions = header_extensions[extension]
+  local from, to = "src", "include"
+  if not extensions then
+    from, to = "include", "src"
+    extensions = source_extensions[extension]
+    if extension == "h" then
+      extensions = vim.bo[bufnr].filetype == "c" and { "c", "cpp", "cc", "cxx" }
+        or { "cpp", "cc", "cxx", "c" }
+    end
+  end
+  if not extensions then
+    return nil
+  end
+
+  local prefix, relative = base:match("^(.*)/" .. from .. "/(.+)$")
+  if not prefix then
+    return nil
+  end
+  for _, ext in ipairs(extensions) do
+    local candidate = prefix .. "/" .. to .. "/" .. relative .. "." .. ext
+    if vim.uv.fs_stat(candidate) then
+      return candidate
+    end
+  end
+end
+
+local function switch_source_header(bufnr, client)
+  local function open(path)
+    if vim.api.nvim_get_current_buf() ~= bufnr then
+      return
+    end
+    if path then
+      vim.cmd.edit(vim.fn.fnameescape(path))
+    else
+      vim.notify("Corresponding source/header file not found", vim.log.levels.WARN)
+    end
+  end
+
+  local method = "textDocument/switchSourceHeader"
+  if not client:supports_method(method) then
+    open(paired_file(bufnr))
+    return
+  end
+  client:request(method, vim.lsp.util.make_text_document_params(bufnr), function(err, result)
+    open(not err and result and result ~= "" and vim.uri_to_fname(result) or paired_file(bufnr))
+  end, bufnr)
+end
+
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("my.clangd", {}),
   callback = function(args)
@@ -61,7 +129,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
       return
     end
 
-    map("n", "<leader>ch", "<cmd>LspClangdSwitchSourceHeader<cr>", {
+    map("n", "<leader>ch", function()
+      switch_source_header(args.buf, client)
+    end, {
       buffer = args.buf,
       desc = "Switch C/C++ source/header",
     })

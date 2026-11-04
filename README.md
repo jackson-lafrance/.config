@@ -97,7 +97,10 @@ each project's actual build settings.
 
 Restart Neovim after adding the project settings. Neovim warns once per clangd
 project when none of these metadata files exists. `<leader>li` shows the
-attached servers. `<leader>lf` reaches clangd through Conform and does not need
+attached servers. `<leader>ch` asks clangd to switch between a source and
+header; if clangd cannot find the match, it also checks the corresponding path
+under sibling `src/` and `include/` directories (including nested paths).
+`<leader>lf` reaches clangd through Conform and does not need
 the standalone `clang-format` executable. Inlay hints stay off unless toggled
 for a buffer with `<leader>ci`.
 
